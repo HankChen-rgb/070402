@@ -1,1352 +1,1345 @@
-{\rtf1\ansi\ansicpg950\cocoartf2870
-\cocoatextscaling0\cocoaplatform0{\fonttbl\f0\fswiss\fcharset0 Helvetica;}
-{\colortbl;\red255\green255\blue255;}
-{\*\expandedcolortbl;;}
-\paperw11900\paperh16840\margl1440\margr1440\vieww11520\viewh8400\viewkind0
-\pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitSculpt AI - 隨身智慧體態雕塑與三餐熱量分析</title>
+  
+  <!-- Load React and ReactDOM from CDN -->
+  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
+  
+  <!-- Load Babel for JSX compiling in browser -->
+  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+  
+  <!-- Load Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Tailwind CSS Configuration for custom styling -->
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            slate: {
+              850: '#1e293b95', // semi-transparent
+            }
+          }
+        }
+      }
+    }
+  </script>
 
-\f0\fs24 \cf0 <!DOCTYPE html>\
-<html lang="zh-TW" class="dark">\
-<head>\
-  <meta charset="UTF-8">\
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">\
-  <title>FitSculpt AI - \uc0\u38568 \u36523 \u26234 \u24935 \u39636 \u24907 \u38613 \u22609 \u33287 \u19977 \u39184 \u29105 \u37327 \u20998 \u26512 </title>\
-  \
-  <!-- Load React and ReactDOM from CDN -->\
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>\
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>\
-  \
-  <!-- Load Babel for JSX compiling in browser -->\
-  <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>\
-  \
-  <!-- Load Tailwind CSS via CDN -->\
-  <script src="https://cdn.tailwindcss.com"></script>\
-  \
-  <!-- Tailwind CSS Configuration for custom styling -->\
-  <script>\
-    tailwind.config = \{\
-      darkMode: 'class',\
-      theme: \{\
-        extend: \{\
-          colors: \{\
-            slate: \{\
-              850: '#1e293b95', // semi-transparent\
-            \}\
-          \}\
-        \}\
-      \}\
-    \}\
-  </script>\
-\
-  <style>\
-    /* Custom scrollbar for fluid UI */\
-    ::-webkit-scrollbar \{\
-      width: 6px;\
-      height: 6px;\
-    \}\
-    ::-webkit-scrollbar-track \{\
-      background: #0f172a;\
-    \}\
-    ::-webkit-scrollbar-thumb \{\
-      background: #334155;\
-      border-radius: 999px;\
-    \}\
-    ::-webkit-scrollbar-thumb:hover \{\
-      background: #10b981;\
-    \}\
-    /* Simple custom animations */\
-    @keyframes pulse-slow \{\
-      0%, 100% \{ opacity: 1; transform: scale(1); \}\
-      50% \{ opacity: 0.8; transform: scale(1.02); \}\
-    \}\
-    .animate-pulse-slow \{\
-      animation: pulse-slow 3s infinite ease-in-out;\
-    \}\
-  </style>\
-</head>\
-<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">\
-\
-  <div id="root"></div>\
-\
-  <script type="text/babel">\
-    const \{ useState, useEffect, useRef \} = React;\
-\
-    // --- PRESET SYSTEM DATA ---\
-    const apiKey = ""; // Users can inject their personal key at runtime or hardcode here.\
-\
-    const DEFAULT_USER_PROFILE = \{\
-      age: 31,\
-      gender: 'female',\
-      height: 165,\
-      weight: 60,\
-      activityLevel: '1.55', // Moderately active\
-      goal: 'lose_fat', // Target deficit\
-      bmr: 1320,\
-      tdee: 2046,\
-      targetCalories: 1646,\
-      targetProtein: 120,\
-      targetCarbs: 160,\
-      targetFat: 50,\
-    \};\
-\
-    const PRESET_FOODS = [\
-      \{\
-        name: "\uc0\u33298 \u32933 \u38622 \u33016 \u32905 \u33287 \u22320 \u29916 \u26178 \u34092 ",\
-        image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=60",\
-        calories: 420,\
-        protein: 38,\
-        carbs: 45,\
-        fat: 8,\
-        analysis: "\uc0\u21253 \u21547 \u33298 \u32933 \u38622 \u33016 \u32905 \u32004  150g\u65288 \u20778 \u36074 \u34507 \u30333 \u36074 \u20358 \u28304 \u65289 \u65292 \u28900 \u22320 \u29916 \u32004  120g\u65288 \u20302  GI \u30899 \u27700 \u65289 \u65292 \u20197 \u21450 \u33457 \u26928 \u33756 \u33287 \u23567 \u30058 \u33540 \u12290 \u25972 \u39636 \u33203 \u39135 \u32406 \u32173 \u35920 \u23500 \u65292 \u39165 \u36275 \u24863 \u20339 \u12290 ",\
-        advice: "\uc0\u36889 \u26159 \u19968 \u38931 \u38750 \u24120 \u27161 \u28310 \u30340 \u28187 \u33026 \u38613 \u22609 \u39184 \u65281 \u34507 \u30333 \u36074 \u21547 \u37327 \u20805 \u35029 \u65292 \u26377 \u21161 \u26044 \u37325 \u35347 \u24460 \u30340 \u32908 \u32905 \u20462 \u24489 \u33287 \u21512 \u25104 \u12290 \u30899 \u27700 \u21270 \u21512 \u29289 \u36969 \u20013 \u65292 \u33021 \u28858 \u24744 \u30340 \u26377 \u27687 \u36939 \u21205 \u25552 \u20379 \u31337 \u23450 \u33021 \u37327 \u12290 "\
-      \},\
-      \{\
-        name: "\uc0\u39321 \u29006 \u39853 \u39770 \u37197 \u34268 \u40613 \u31961 \u31859 \u39151 ",\
-        image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&auto=format&fit=crop&q=60",\
-        calories: 550,\
-        protein: 32,\
-        carbs: 50,\
-        fat: 22,\
-        analysis: "\uc0\u29006 \u39853 \u39770 \u25490 \u32004  130g \u25552 \u20379 \u35920 \u23500 \u30340  Omega-3 \u33026 \u32938 \u37240 \u33287 \u34507 \u30333 \u36074 \u65292 \u25645 \u37197 \u34268 \u40613 \u31961 \u31859 \u39151 \u32004  1\u30871 \u65292 \u20197 \u21450 \u34310 \u31565 \u33287 \u27833 \u28460 \u30058 \u33540 \u12290 ",\
-        advice: "\uc0\u39853 \u39770 \u30340 \u20778 \u36074 \u33026 \u32938 \u23565 \u33655 \u29246 \u33945 \u20581 \u24247 \u33287 \u38364 \u31680 \u20462 \u24489 \u26997 \u20339 \u65288 \u36969 \u21512 \u27599 \u26085 \u37325 \u35347 \u30340 \u24744 \u65289 \u12290 \u33509 \u35201 \u21152 \u24375 \u28187 \u33026 \u65292 \u21487 \u20197 \u31245 \u24494 \u28187 \u23569 \u28921 \u35519 \u29992 \u27833 \u65292 \u20294 \u27492 \u32068 \u21512 \u29151 \u39178 \u26997 \u28858 \u22343 \u34913 \u65281 "\
-      \},\
-      \{\
-        name: "\uc0\u28961 \u31958 \u20778 \u26684 \u29141 \u40613 \u27700 \u26524 \u30871 ",\
-        image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&auto=format&fit=crop&q=60",\
-        calories: 320,\
-        protein: 18,\
-        carbs: 48,\
-        fat: 6,\
-        analysis: "\uc0\u24076 \u33240 \u24335 \u28961 \u31958 \u20778 \u26684 \u32004  200g\u65292 \u29141 \u40613 \u29255  30g\u65292 \u32156 \u21512 \u33683 \u26524 \u33287 \u22855 \u30064 \u26524 \u12290 \u40670 \u32180 \u23569 \u37327 \u22533 \u26524 \u30862 \u12290 ",\
-        advice: "\uc0\u38750 \u24120 \u36969 \u21512 \u20316 \u28858 \u26089 \u39184 \u25110 \u36939 \u21205 \u21069 \u30340 \u23567 \u40670 \u24515 \u12290 \u33683 \u26524 \u23500 \u21547 \u25239 \u27687 \u21270 \u29289 \u65292 \u33021 \u28187 \u32233 \u28608 \u28872 \u37325 \u35347 \u24118 \u20358 \u30340 \u32908 \u32905 \u30332 \u28814 \u65292 \u24076 \u33240 \u20778 \u26684 \u21063 \u25552 \u20379 \u20102 \u32233 \u37323 \u37226 \u34507 \u30333 \u65292 \u25345 \u32396 \u28363 \u39178 \u32908 \u32905 \u12290 "\
-      \}\
-    ];\
-\
-    // --- MAIN REACT COMPONENT ---\
-    function App() \{\
-      const [userProfile, setUserProfile] = useState(() => \{\
-        const saved = localStorage.getItem('fitsculpt_profile_v2');\
-        return saved ? JSON.parse(saved) : DEFAULT_USER_PROFILE;\
-      \});\
-\
-      const [dailyLogs, setDailyLogs] = useState(() => \{\
-        const saved = localStorage.getItem('fitsculpt_logs_v2');\
-        return saved ? JSON.parse(saved) : \{\};\
-      \});\
-\
-      const [selectedDate, setSelectedDate] = useState(() => \{\
-        return new Date().toISOString().split('T')[0];\
-      \});\
-\
-      const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, analyzer, calculator, history\
-      \
-      const [cameraActive, setCameraActive] = useState(false);\
-      const [capturedImage, setCapturedImage] = useState(null);\
-      const [mealType, setMealType] = useState('breakfast');\
-      const [isAnalyzing, setIsAnalyzing] = useState(false);\
-      const [analysisResult, setAnalysisResult] = useState(null);\
-      const [tempApiKey, setTempApiKey] = useState(() => localStorage.getItem('fitsculpt_api_key') || "");\
-      \
-      const [manualMeal, setManualMeal] = useState(\{ name: '', calories: '', protein: '', carbs: '', fat: '' \});\
-      const [exerciseForm, setExerciseForm] = useState(\{ type: 'strength', duration: 45, intensity: 'medium', notes: '' \});\
-      const [currentWeightInput, setCurrentWeightInput] = useState(userProfile.weight);\
-      const [toast, setToast] = useState(null);\
-\
-      const videoRef = useRef(null);\
-      const canvasRef = useRef(null);\
-\
-      // --- PERSISTENT UTILITIES ---\
-      useEffect(() => \{\
-        localStorage.setItem('fitsculpt_profile_v2', JSON.stringify(userProfile));\
-      \}, [userProfile]);\
-\
-      useEffect(() => \{\
-        localStorage.setItem('fitsculpt_logs_v2', JSON.stringify(dailyLogs));\
-      \}, [dailyLogs]);\
-\
-      useEffect(() => \{\
-        localStorage.setItem('fitsculpt_api_key', tempApiKey);\
-      \}, [tempApiKey]);\
-\
-      const showToast = (message, type = 'success') => \{\
-        setToast(\{ message, type \});\
-        setTimeout(() => setToast(null), 3500);\
-      \};\
-\
-      const todayLog = dailyLogs[selectedDate] || \{\
-        meals: [],\
-        water: 0,\
-        exercise: null,\
-        weight: userProfile.weight\
-      \};\
-\
-      const recalculateTargets = (profile) => \{\
-        const \{ age, gender, height, weight, activityLevel, goal \} = profile;\
-        \
-        // Mifflin-St Jeor Formula\
-        let bmrVal = 0;\
-        if (gender === 'male') \{\
-          bmrVal = 10 * weight + 6.25 * height - 5 * age + 5;\
-        \} else \{\
-          bmrVal = 10 * weight + 6.25 * height - 5 * age - 161;\
-        \}\
-        \
-        const tdeeVal = Math.round(bmrVal * parseFloat(activityLevel));\
-        let targetCal = tdeeVal;\
-        let pRatio = 0.3; // protein ratio\
-        let cRatio = 0.4; // carb ratio\
-        let fRatio = 0.3; // fat ratio\
-\
-        if (goal === 'lose_fat') \{\
-          targetCal = Math.round(tdeeVal - 450); \
-          pRatio = 0.35; // preserve lean mass\
-          cRatio = 0.35;\
-          fRatio = 0.30;\
-        \} else if (goal === 'build_muscle') \{\
-          targetCal = Math.round(tdeeVal + 300);\
-          pRatio = 0.30;\
-          cRatio = 0.45;\
-          fRatio = 0.25;\
-        \}\
-\
-        if (targetCal < bmrVal) targetCal = Math.round(bmrVal);\
-\
-        const targetProtein = Math.round((targetCal * pRatio) / 4);\
-        const targetCarbs = Math.round((targetCal * cRatio) / 4);\
-        const targetFat = Math.round((targetCal * fRatio) / 9);\
-\
-        return \{\
-          ...profile,\
-          bmr: Math.round(bmrVal),\
-          tdee: tdeeVal,\
-          targetCalories: targetCal,\
-          targetProtein,\
-          targetCarbs,\
-          targetFat\
-        \};\
-      \};\
-\
-      const handleProfileChange = (e) => \{\
-        const \{ name, value \} = e.target;\
-        setUserProfile(prev => \{\
-          const updated = \{ ...prev, [name]: isNaN(value) ? value : parseFloat(value) \};\
-          return recalculateTargets(updated);\
-        \});\
-      \};\
-\
-      const startCamera = async () => \{\
-        setCapturedImage(null);\
-        setCameraActive(true);\
-        try \{\
-          const stream = await navigator.mediaDevices.getUserMedia(\{ \
-            video: \{ facingMode: 'environment' \} \
-          \});\
-          if (videoRef.current) \{\
-            videoRef.current.srcObject = stream;\
-          \}\
-        \} catch (err) \{\
-          console.error(err);\
-          showToast("\uc0\u28961 \u27861 \u21855 \u29992 \u30456 \u27231 \u65292 \u35531 \u20801 \u35377 \u27402 \u38480 \u12289 \u25913 \u25505 \u25163 \u21205 \u19978 \u20659 \u25110 \u39636 \u39511 \u38928 \u35373 \u27169 \u25836 \u39184 \u40670 \u65281 ", "error");\
-          setCameraActive(false);\
-        \}\
-      \};\
-\
-      const stopCamera = () => \{\
-        if (videoRef.current && videoRef.current.srcObject) \{\
-          const tracks = videoRef.current.srcObject.getTracks();\
-          tracks.forEach(track => track.stop());\
-        \}\
-        setCameraActive(false);\
-      \};\
-\
-      const capturePhoto = () => \{\
-        if (videoRef.current && canvasRef.current) \{\
-          const video = videoRef.current;\
-          const canvas = canvasRef.current;\
-          canvas.width = video.videoWidth;\
-          canvas.height = video.videoHeight;\
-          const ctx = canvas.getContext('2d');\
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);\
-          const base64 = canvas.toDataURL('image/png');\
-          setCapturedImage(base64);\
-          stopCamera();\
-        \}\
-      \};\
-\
-      const handleFileUpload = (e) => \{\
-        const file = e.target.files[0];\
-        if (file) \{\
-          const reader = new FileReader();\
-          reader.onloadend = () => \{\
-            setCapturedImage(reader.result);\
-          \};\
-          reader.readAsDataURL(file);\
-        \}\
-      \};\
-\
-      const analyzeImageWithGemini = async (base64Data) => \{\
-        setIsAnalyzing(true);\
-        setAnalysisResult(null);\
-\
-        const base64Clean = base64Data.split(',')[1];\
-        const activeKey = tempApiKey || apiKey;\
-        \
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=$\{activeKey\}`;\
-        \
-        const systemPrompt = `You are an elite fitness nutritionist specialized in body sculpting, weight loss, and daily resistance/cardio tracking. \
-Analyze the user's food photo and estimate the food items, portions, calories, and macros.\
-You must return your response strictly as a JSON object, with absolutely no surrounding markdown wrappers (do NOT use \\`\\`\\`json or \\`\\`\\`).\
-The output must conform exactly to this schema:\
-\{\
-  "foodName": "\uc0\u20027 \u35201 \u39135 \u29289 \u21517 \u31281 ",\
-  "calories": 120,\
-  "protein": 15,\
-  "carbs": 20,\
-  "fat": 5,\
-  "analysis": "\uc0\u35443 \u32048 \u30340 \u39135 \u29289 \u20839 \u23481 \u33287 \u20221 \u37327 \u20272 \u31639 \u20998 \u26512 ...",\
-  "advice": "\uc0\u37341 \u23565 \u37325 \u35347 \u33287 \u26377 \u27687 \u20581 \u36523 \u32773 \u30340 \u29151 \u39178 \u33287 \u38613 \u22609 \u24314 \u35696 ..."\
-\}\
-Respond fully in Traditional Chinese (\uc0\u32321 \u39636 \u20013 \u25991 ).`;\
-\
-        const payload = \{\
-          contents: [\{\
-            role: "user",\
-            parts: [\
-              \{ text: "\uc0\u36889 \u26159 \u25105 \u20170 \u22825 \u30340 \u19968 \u39184 \u12290 \u35531 \u24171 \u25105 \u20998 \u26512 \u20854 \u39135 \u29289 \u20839 \u23481 \u12289 \u20272 \u31639 \u29105 \u37327 \u65288 \u22823 \u21345 \u65289 \u33287 \u19977 \u22823 \u29151 \u39178 \u32032 \u65288 \u34507 \u30333 \u36074 \u12289 \u30899 \u27700 \u12289 \u33026 \u32938 \u65289 \u65292 \u20006 \u32102 \u20104 \u36969 \u21512 \u25105 \u27599 \u26085 \u37325 \u35347 \u33287 \u26377 \u27687 \u36939 \u21205 \u30340 \u39154 \u39135 \u22238 \u39243 \u33287 \u39636 \u24907 \u38613 \u22609 \u24314 \u35696 \u12290 " \},\
-              \{ inlineData: \{ mimeType: "image/png", data: base64Clean \} \}\
-            ]\
-          \}],\
-          systemInstruction: \{\
-            parts: [\{ text: systemPrompt \}]\
-          \},\
-          generationConfig: \{\
-            responseMimeType: "application/json"\
-          \}\
-        \};\
-\
-        try \{\
-          if (!activeKey) \{\
-            // Trigger beautiful fallback / simulation instantly\
-            setTimeout(() => \{\
-              const randomPreset = PRESET_FOODS[Math.floor(Math.random() * PRESET_FOODS.length)];\
-              setAnalysisResult(randomPreset);\
-              setIsAnalyzing(false);\
-              showToast("\uc0\u23637 \u31034 \u27169 \u24335 \u65306 \u24050 \u28858 \u24744 \u36617 \u20837 \u38928 \u35373 \u39640 \u31934 \u28310 \u24230 \u27169 \u25836 \u32080 \u26524 \u65281 (\u36664 \u20837  API \u37329 \u38000 \u21487 \u20351 \u29992 \u30495 \u23526 \u22294 \u29255 \u36776 \u35672 )", "info");\
-            \}, 1200);\
-            return;\
-          \}\
-\
-          const response = await fetch(endpoint, \{\
-            method: 'POST',\
-            headers: \{ 'Content-Type': 'application/json' \},\
-            body: JSON.stringify(payload)\
-          \});\
-\
-          if (!response.ok) throw new Error(`HTTP: $\{response.status\}`);\
-          const result = await response.json();\
-          const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;\
-          \
-          if (textResponse) \{\
-            const parsed = JSON.parse(textResponse);\
-            setAnalysisResult(\{\
-              name: parsed.foodName,\
-              calories: parsed.calories,\
-              protein: parsed.protein,\
-              carbs: parsed.carbs,\
-              fat: parsed.fat,\
-              analysis: parsed.analysis,\
-              advice: parsed.advice,\
-              image: base64Data\
-            \});\
-            showToast("Gemini \uc0\u24433 \u20687 \u36776 \u35672 \u25104 \u21151 \u65281 ", "success");\
-          \} else \{\
-            throw new Error("\uc0\u28961 \u25928 \u30340  API \u22238 \u25033 ");\
-          \}\
-        \} catch (err) \{\
-          console.error(err);\
-          showToast("AI \uc0\u36776 \u35672 \u30064 \u24120 \u65292 \u24050 \u33258 \u21205 \u36617 \u20837 \u38928 \u35373 \u20581 \u24247 \u32654 \u39135 \u20379 \u24744 \u28961 \u38556 \u31001 \u39636 \u39511 \u65281 ", "error");\
-          const fallbackPreset = PRESET_FOODS[0];\
-          setAnalysisResult(\{ ...fallbackPreset, image: base64Data \});\
-        \} finally \{\
-          setIsAnalyzing(false);\
-        \}\
-      \};\
-\
-      const usePresetFood = (preset) => \{\
-        setCapturedImage(preset.image);\
-        setAnalysisResult(preset);\
-        showToast(`\uc0\u24050 \u25104 \u21151 \u22871 \u29992 \u38928 \u35373 \u39135 \u29289 \u65306 $\{preset.name\}`, "success");\
-      \};\
-\
-      const saveAnalyzedMealToLog = () => \{\
-        if (!analysisResult) return;\
-\
-        const newMeal = \{\
-          id: Date.now().toString(),\
-          type: mealType,\
-          name: analysisResult.name || analysisResult.foodName,\
-          calories: parseInt(analysisResult.calories) || 0,\
-          protein: parseInt(analysisResult.protein) || 0,\
-          carbs: parseInt(analysisResult.carbs) || 0,\
-          fat: parseInt(analysisResult.fat) || 0,\
-          image: analysisResult.image || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&auto=format&fit=crop&q=60",\
-          time: new Date().toLocaleTimeString([], \{ hour: '2-digit', minute: '2-digit' \}),\
-          analysis: analysisResult.analysis,\
-          advice: analysisResult.advice\
-        \};\
-\
-        updateLogForDate(selectedDate, (prevLog) => (\{\
-          ...prevLog,\
-          meals: [...prevLog.meals, newMeal]\
-        \}));\
-\
-        showToast(`\uc0\u25104 \u21151 \u35352 \u37636 \u33267 \u20170 \u22825 \u30340 \u12300 $\{getMealTypeLabel(mealType)\}\u12301 \u65281 `);\
-        setCapturedImage(null);\
-        setAnalysisResult(null);\
-        setActiveTab('dashboard');\
-      \};\
-\
-      const deleteMeal = (mealId) => \{\
-        updateLogForDate(selectedDate, (prevLog) => (\{\
-          ...prevLog,\
-          meals: prevLog.meals.filter(m => m.id !== mealId)\
-        \}));\
-        showToast("\uc0\u24050 \u21034 \u38500 \u35442 \u31558 \u39154 \u39135 \u32000 \u37636 ", "info");\
-      \};\
-\
-      const handleManualAdd = (e) => \{\
-        e.preventDefault();\
-        if (!manualMeal.name || !manualMeal.calories) \{\
-          showToast("\uc0\u35531 \u33267 \u23569 \u36664 \u20837 \u39135 \u29289 \u21517 \u31281 \u33287 \u21345 \u36335 \u37324 \u65281 ", "error");\
-          return;\
-        \}\
-\
-        const newMeal = \{\
-          id: Date.now().toString(),\
-          type: mealType,\
-          name: manualMeal.name,\
-          calories: parseInt(manualMeal.calories) || 0,\
-          protein: parseInt(manualMeal.protein) || 0,\
-          carbs: parseInt(manualMeal.carbs) || 0,\
-          fat: parseInt(manualMeal.fat) || 0,\
-          image: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&auto=format&fit=crop&q=60",\
-          time: new Date().toLocaleTimeString([], \{ hour: '2-digit', minute: '2-digit' \}),\
-          analysis: "\uc0\u25163 \u21205 \u36664 \u20837 \u32000 \u37636 ",\
-          advice: "\uc0\u28961  AI \u24433 \u20687 \u36776 \u35672 \u20998 \u26512 \u65292 \u35531 \u37197 \u21512 \u24744 \u30340  TDEE \u30446 \u27161 \u25345 \u32396 \u22686 \u32908 \u28187 \u33026 \u65281 "\
-        \};\
-\
-        updateLogForDate(selectedDate, (prevLog) => (\{\
-          ...prevLog,\
-          meals: [...prevLog.meals, newMeal]\
-        \}));\
-\
-        showToast(`\uc0\u25104 \u21151 \u25163 \u21205 \u30331 \u37636 \u65306 $\{manualMeal.name\}`);\
-        setManualMeal(\{ name: '', calories: '', protein: '', carbs: '', fat: '' \});\
-      \};\
-\
-      const updateLogForDate = (date, updateFn) => \{\
-        setDailyLogs(prev => \{\
-          const currentLog = prev[date] || \{\
-            meals: [],\
-            water: 0,\
-            exercise: null,\
-            weight: userProfile.weight\
-          \};\
-          const updatedLog = updateFn(currentLog);\
-          return \{ ...prev, [date]: updatedLog \};\
-        \});\
-      \};\
-\
-      const adjustWater = (amount) => \{\
-        updateLogForDate(selectedDate, (prevLog) => (\{\
-          ...prevLog,\
-          water: Math.max(0, prevLog.water + amount)\
-        \}));\
-        showToast(`\uc0\u27700 \u20998 \u32000 \u37636 \u65306 $\{amount > 0 ? '+' : ''\}$\{amount\} ml`);\
-      \};\
-\
-      const handleWeightChange = (e) => \{\
-        const val = parseFloat(e.target.value) || 0;\
-        setCurrentWeightInput(val);\
-        updateLogForDate(selectedDate, (prevLog) => (\{ ...prevLog, weight: val \}));\
-        setUserProfile(prev => recalculateTargets(\{ ...prev, weight: val \}));\
-      \};\
-\
-      const handleExerciseSubmit = (e) => \{\
-        e.preventDefault();\
-        let caloriesBurned = 0;\
-        const intensityMultiplier = exerciseForm.intensity === 'high' ? 10 : exerciseForm.intensity === 'medium' ? 7 : 4;\
-        const typeMultiplier = exerciseForm.type === 'both' ? 1.3 : 1.0;\
-        caloriesBurned = Math.round((intensityMultiplier * userProfile.weight * (exerciseForm.duration / 60)) * typeMultiplier);\
-\
-        updateLogForDate(selectedDate, (prevLog) => (\{\
-          ...prevLog,\
-          exercise: \{ ...exerciseForm, caloriesBurned \}\
-        \}));\
-\
-        showToast(`\uc0\u24050 \u20786 \u23384 \u36939 \u21205 \u65281 \u20170 \u26085 \u29554 \u24471  $\{caloriesBurned\} \u22823 \u21345 \u36939 \u21205 \u35036 \u20767 \u65281 `);\
-      \};\
-\
-      const removeExercise = () => \{\
-        updateLogForDate(selectedDate, (prevLog) => (\{ ...prevLog, exercise: null \}));\
-        showToast("\uc0\u24050 \u28165 \u38500 \u36939 \u21205 \u32000 \u37636 ", "info");\
-      \};\
-\
-      const getMealTypeLabel = (type) => \{\
-        switch (type) \{\
-          case 'breakfast': return '\uc0\u26089 \u39184  \u55356 \u57093 ';\
-          case 'lunch': return '\uc0\u21320 \u39184  \u9728 \u65039 ';\
-          case 'dinner': return '\uc0\u26202 \u39184  \u55356 \u57113 ';\
-          case 'snack': return '\uc0\u40670 \u24515  \u55356 \u57166 ';\
-          default: return '\uc0\u39184 \u40670 ';\
-        \}\
-      \};\
-\
-      const loggedMeals = todayLog.meals || [];\
-      const totalConsumedCalories = loggedMeals.reduce((acc, m) => acc + m.calories, 0);\
-      const totalConsumedProtein = loggedMeals.reduce((acc, m) => acc + m.protein, 0);\
-      const totalConsumedCarbs = loggedMeals.reduce((acc, m) => acc + m.carbs, 0);\
-      const totalConsumedFat = loggedMeals.reduce((acc, m) => acc + m.fat, 0);\
-      const exerciseCaloriesBurned = todayLog.exercise ? todayLog.exercise.caloriesBurned : 0;\
-      \
-      const dynamicTargetCalories = userProfile.targetCalories + exerciseCaloriesBurned;\
-      const remainingCalories = dynamicTargetCalories - totalConsumedCalories;\
-\
-      const handleResetAllData = () => \{\
-        if (confirm("\uc0\u30906 \u23450 \u35201 \u37325 \u35373 \u25152 \u26377 \u25976 \u25818 \u21966 \u65311 \u36889 \u23559 \u24505 \u24213 \u21034 \u38500 \u26412 \u28687 \u35261 \u22120 \u20013 \u30340 \u25152 \u26377 \u39154 \u39135 \u12289 \u27700 \u20998 \u33287 \u36939 \u21205 \u26126 \u32048 \u65281 ")) \{\
-          localStorage.removeItem('fitsculpt_profile_v2');\
-          localStorage.removeItem('fitsculpt_logs_v2');\
-          localStorage.removeItem('fitsculpt_api_key');\
-          setUserProfile(DEFAULT_USER_PROFILE);\
-          setDailyLogs(\{\});\
-          setTempApiKey("");\
-          showToast("\uc0\u25152 \u26377 \u36039 \u26009 \u24050 \u23433 \u20840 \u37325 \u35373 ", "info");\
-        \}\
-      \};\
-\
-      return (\
-        <div className="min-h-screen pb-24 sm:pb-8">\
-          \{/* Toast Alert */\}\
-          \{toast && (\
-            <div className=\{`fixed top-4 right-4 z-50 flex items-center p-4 rounded-xl shadow-2xl border transition-all duration-300 $\{\
-              toast.type === 'error' ? 'bg-rose-950 border-rose-500 text-rose-200' :\
-              toast.type === 'info' ? 'bg-sky-950 border-sky-500 text-sky-200' :\
-              'bg-emerald-950 border-emerald-500 text-emerald-200'\
-            \}`\}>\
-              <span className="mr-2 font-bold">\{toast.type === 'error' ? '\uc0\u9888 \u65039 ' : '\u10024 '\}</span>\
-              <span className="text-sm font-semibold">\{toast.message\}</span>\
-            </div>\
-          )\}\
-\
-          \{/* Top Navbar */\}\
-          <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40">\
-            <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">\
-              <div className="flex items-center gap-3">\
-                <div className="p-2.5 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl shadow-lg shadow-emerald-500/20">\
-                  <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">\
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />\
-                  </svg>\
-                </div>\
-                <div>\
-                  <h1 className="text-xl sm:text-2xl font-black bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">\
-                    FitSculpt AI\
-                  </h1>\
-                  <p className="text-xs text-slate-400 font-medium tracking-wide">\uc0\u38568 \u36523 \u26234 \u24935 \u39636 \u33021 \u35347 \u32244 \u33287 \u19977 \u39184 \u21345 \u36335 \u37324 \u20998 \u26512 \u31995 \u32113 </p>\
-                </div>\
-              </div>\
-\
-              \{/* Date controller */\}\
-              <div className="flex items-center gap-3 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">\
-                <button\
-                  onClick=\{() => \{\
-                    const prev = new Date(selectedDate);\
-                    prev.setDate(prev.getDate() - 1);\
-                    setSelectedDate(prev.toISOString().split('T')[0]);\
-                  \}\}\
-                  className="p-2 hover:bg-slate-800 rounded-xl transition text-slate-300 hover:text-white"\
-                >\
-                  \uc0\u9664 \
-                </button>\
-                <input\
-                  type="date"\
-                  value=\{selectedDate\}\
-                  onChange=\{(e) => setSelectedDate(e.target.value)\}\
-                  className="bg-transparent text-sm font-bold text-emerald-400 text-center focus:outline-none cursor-pointer"\
-                />\
-                <button\
-                  onClick=\{() => \{\
-                    const next = new Date(selectedDate);\
-                    next.setDate(next.getDate() + 1);\
-                    setSelectedDate(next.toISOString().split('T')[0]);\
-                  \}\}\
-                  className="p-2 hover:bg-slate-800 rounded-xl transition text-slate-300 hover:text-white"\
-                >\
-                  \uc0\u9654 \
-                </button>\
-              </div>\
-            </div>\
-          </header>\
-\
-          \{/* Main Layout Area */\}\
-          <main className="max-w-6xl mx-auto px-4 py-8">\
-            \
-            \{/* Nav Tabs */\}\
-            <div className="flex bg-slate-900/60 p-1 rounded-2xl border border-slate-800/80 mb-8 overflow-x-auto no-scrollbar gap-1">\
-              <button\
-                onClick=\{() => setActiveTab('dashboard')\}\
-                className=\{`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-2 $\{\
-                  activeTab === 'dashboard' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'\
-                \}`\}\
-              >\
-                \uc0\u55357 \u56522  \u27599 \u26085 \u20736 \u34920 \u26495 \
-              </button>\
-              <button\
-                onClick=\{() => setActiveTab('analyzer')\}\
-                className=\{`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-2 $\{\
-                  activeTab === 'analyzer' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'\
-                \}`\}\
-              >\
-                \uc0\u55357 \u56568  AI \u25293 \u29031 \u31639 \u29105 \u37327 \
-              </button>\
-              <button\
-                onClick=\{() => setActiveTab('calculator')\}\
-                className=\{`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-2 $\{\
-                  activeTab === 'calculator' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'\
-                \}`\}\
-              >\
-                \uc0\u9878 \u65039  TDEE \u38613 \u22609 \u35336 \u30059 \
-              </button>\
-              <button\
-                onClick=\{() => setActiveTab('history')\}\
-                className=\{`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-2 $\{\
-                  activeTab === 'history' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'\
-                \}`\}\
-              >\
-                \uc0\u55357 \u56520  \u27511 \u21490 \u36264 \u21218 \
-              </button>\
-            </div>\
-\
-            \{/* ==========================================\
-                TAB: DASHBOARD\
-               ========================================== */\}\
-            \{\}\
-            \{activeTab === 'dashboard' && (\
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">\
-                \
-                \{/* Left Columns (Stats, Progress, and Meals List) */\}\
-                <div className="lg:col-span-2 space-y-8">\
-                  \
-                  \{/* KPI Progress Card */\}\
-                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl relative overflow-hidden">\
-                    <h3 className="text-lg font-bold text-slate-200 mb-6 flex items-center justify-between">\
-                      <span>\uc0\u55357 \u56517  \u20170 \u26085 \u29151 \u39178 \u38928 \u31639 </span>\
-                      <span className="text-xs font-normal text-emerald-400 px-3 py-1 bg-slate-950 rounded-full border border-emerald-500/10">\
-                        \{userProfile.goal === 'lose_fat' ? '\uc0\u28187 \u33026 \u30246 \u36523  \u9986 \u65039 ' : '\u22686 \u32908 \u35722 \u22767  \u55357 \u56490 '\}\
-                      </span>\
-                    </h3>\
-\
-                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 items-center">\
-                      \{/* Circle Cal Progress */\}\
-                      <div className="flex flex-col items-center justify-center relative col-span-1">\
-                        <svg className="w-32 h-32 transform -rotate-90">\
-                          <circle cx="64" cy="64" r="54" strokeWidth="8" stroke="#1e293b" fill="transparent" />\
-                          <circle \
-                            cx="64" \
-                            cy="64" \
-                            r="54" \
-                            strokeWidth="8" \
-                            stroke="url(#emerald-grad)"\
-                            fill="transparent" \
-                            strokeDasharray=\{2 * Math.PI * 54\}\
-                            strokeDashoffset=\{Math.max(0, 2 * Math.PI * 54 * (1 - totalConsumedCalories / dynamicTargetCalories))\}\
-                            strokeLinecap="round"\
-                          />\
-                          <defs>\
-                            <linearGradient id="emerald-grad" x1="0%" y1="0%" x2="100%" y2="100%">\
-                              <stop offset="0%" stopColor="#34d399" />\
-                              <stop offset="100%" stopColor="#059669" />\
-                            </linearGradient>\
-                          </defs>\
-                        </svg>\
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">\
-                          <span className="text-[10px] text-slate-400">\uc0\u21097 \u39192 \u38989 \u24230 </span>\
-                          <span className=\{`text-xl font-black $\{remainingCalories >= 0 ? 'text-emerald-400' : 'text-rose-400'\}`\}>\
-                            \{remainingCalories\}\
-                          </span>\
-                          <span className="text-[10px] text-slate-500">kcal</span>\
-                        </div>\
-                      </div>\
-\
-                      \{/* Math breakdown */\}\
-                      <div className="sm:col-span-3 grid grid-cols-3 gap-4 text-center sm:text-left bg-slate-950 p-4 rounded-2xl border border-slate-800">\
-                        <div>\
-                          <span className="block text-xs text-slate-400 mb-1">\uc0\u22522 \u30990 \u35336 \u30059 </span>\
-                          <span className="text-base font-bold text-slate-200">\{userProfile.targetCalories\} <span className="text-[10px] font-normal text-slate-500">kcal</span></span>\
-                        </div>\
-                        <div className="border-x border-slate-850 px-4">\
-                          <span className="block text-xs text-slate-400 mb-1">\uc0\u36939 \u21205 \u35036 \u20767 </span>\
-                          <span className="text-base font-bold text-emerald-400">+\{exerciseCaloriesBurned\} <span className="text-[10px] font-normal text-slate-500">kcal</span></span>\
-                        </div>\
-                        <div>\
-                          <span className="block text-xs text-slate-400 mb-1">\uc0\u20170 \u26085 \u24050 \u21507 </span>\
-                          <span className="text-base font-bold text-teal-400">\{totalConsumedCalories\} <span className="text-[10px] font-normal text-slate-500">kcal</span></span>\
-                        </div>\
-                      </div>\
-                    </div>\
-\
-                    \{/* Macros progress */\}\
-                    <div className="mt-8 space-y-4">\
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">\uc0\u19977 \u22823 \u23439 \u37327 \u29151 \u39178 \u32032 \u30446 \u27161 \u36948 \u25104 \u24230 </h4>\
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">\
-                        \{/* Protein */\}\
-                        <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">\
-                          <div className="flex justify-between items-center mb-1.5 text-xs">\
-                            <span className="font-semibold text-slate-300">\uc0\u55356 \u57175  \u34507 \u30333 \u36074 </span>\
-                            <span className="text-emerald-400 font-bold">\{totalConsumedProtein\}g / \{userProfile.targetProtein\}g</span>\
-                          </div>\
-                          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">\
-                            <div className="bg-emerald-500 h-full rounded-full transition-all duration-300" style=\{\{ width: `$\{Math.min(100, (totalConsumedProtein / userProfile.targetProtein) * 100)\}%` \}\}></div>\
-                          </div>\
-                        </div>\
-                        \{/* Carbs */\}\
-                        <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">\
-                          <div className="flex justify-between items-center mb-1.5 text-xs">\
-                            <span className="font-semibold text-slate-300">\uc0\u55356 \u57150  \u30899 \u27700 </span>\
-                            <span className="text-cyan-400 font-bold">\{totalConsumedCarbs\}g / \{userProfile.targetCarbs\}g</span>\
-                          </div>\
-                          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">\
-                            <div className="bg-cyan-500 h-full rounded-full transition-all duration-300" style=\{\{ width: `$\{Math.min(100, (totalConsumedCarbs / userProfile.targetCarbs) * 100)\}%` \}\}></div>\
-                          </div>\
-                        </div>\
-                        \{/* Fat */\}\
-                        <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">\
-                          <div className="flex justify-between items-center mb-1.5 text-xs">\
-                            <span className="font-semibold text-slate-300">\uc0\u55358 \u56657  \u33026 \u32938 </span>\
-                            <span className="text-amber-400 font-bold">\{totalConsumedFat\}g / \{userProfile.targetFat\}g</span>\
-                          </div>\
-                          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">\
-                            <div className="bg-amber-500 h-full rounded-full transition-all duration-300" style=\{\{ width: `$\{Math.min(100, (totalConsumedFat / userProfile.targetFat) * 100)\}%` \}\}></div>\
-                          </div>\
-                        </div>\
-                      </div>\
-                    </div>\
-\
-                  </div>\
-\
-                  \{/* Meals log list */\}\
-                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">\
-                    <div className="flex items-center justify-between mb-6">\
-                      <h3 className="text-lg font-bold text-slate-200">\uc0\u55356 \u57213 \u65039  \u20170 \u26085 \u39184 \u40670 \u26085 \u35468  (\{loggedMeals.length\})</h3>\
-                      <button\
-                        onClick=\{() => setActiveTab('analyzer')\}\
-                        className="text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl font-bold transition"\
-                      >\
-                        \uc0\u26032 \u22686 \u19968 \u39184  \u65291 \
-                      </button>\
-                    </div>\
-\
-                    \{loggedMeals.length === 0 ? (\
-                      <div className="text-center py-12 bg-slate-950/40 border border-dashed border-slate-800 rounded-2xl">\
-                        <span className="text-4xl block mb-3">\uc0\u55358 \u56663 </span>\
-                        <p className="text-slate-400 font-semibold">\uc0\u20170 \u26085 \u36996 \u27794 \u26377 \u30331 \u37636 \u39154 \u39135 \u32000 \u37636 \u21815 \u65281 </p>\
-                        <p className="text-xs text-slate-500 mt-1">\uc0\u24744 \u21487 \u20197 \u21033 \u29992 \u12300 AI\u25293 \u29031 \u31639 \u29105 \u37327 \u12301 \u25110 \u22871 \u29992 \u24555 \u36895 \u38928 \u35373 \u32654 \u39135 \u20358 \u24314 \u31435 \u26085 \u35468 \u65281 </p>\
-                      </div>\
-                    ) : (\
-                      <div className="space-y-4">\
-                        \{loggedMeals.map((meal) => (\
-                          <div key=\{meal.id\} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row gap-4 relative overflow-hidden">\
-                            <div className="w-full sm:w-20 h-20 rounded-xl overflow-hidden bg-slate-900 border border-slate-800 flex-shrink-0">\
-                              <img src=\{meal.image\} alt=\{meal.name\} className="w-full h-full object-cover" onError=\{(e) => \{e.target.src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&auto=format&fit=crop&q=60"\}\} />\
-                            </div>\
-                            <div className="flex-1 min-w-0">\
-                              <div className="flex items-start justify-between">\
-                                <div>\
-                                  <span className="text-[10px] font-bold bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">\{getMealTypeLabel(meal.type)\}</span>\
-                                  <h4 className="text-base font-bold text-slate-200 mt-1">\{meal.name\}</h4>\
-                                </div>\
-                                <button onClick=\{() => deleteMeal(meal.id)\} className="text-slate-500 hover:text-rose-400 text-sm p-1.5 rounded-lg transition">\uc0\u55357 \u56785 \u65039 </button>\
-                              </div>\
-                              <div className="flex flex-wrap gap-2 mt-2">\
-                                <span className="text-xs bg-slate-900 border border-slate-800 px-2 py-1 rounded-md text-emerald-400 font-bold">\uc0\u55357 \u56613  \{meal.calories\} kcal</span>\
-                                <span className="text-xs bg-slate-900 px-2 py-1 rounded-md text-slate-400">\uc0\u55356 \u57175  \{meal.protein\}g \u34507 </span>\
-                                <span className="text-xs bg-slate-900 px-2 py-1 rounded-md text-slate-400">\uc0\u55356 \u57150  \{meal.carbs\}g \u30899 </span>\
-                                <span className="text-xs bg-slate-900 px-2 py-1 rounded-md text-slate-400">\uc0\u55358 \u56657  \{meal.fat\}g \u33026 </span>\
-                              </div>\
-                              \{meal.advice && (\
-                                <div className="mt-3 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800 text-xs text-slate-400 leading-relaxed">\
-                                  <strong className="text-emerald-400">\uc0\u55357 \u56481  AI \u29151 \u39178 \u22238 \u39243 \u65306 </strong> \{meal.advice\}\
-                                </div>\
-                              )\}\
-                            </div>\
-                          </div>\
-                        ))\}\
-                      </div>\
-                    )\}\
-                  </div>\
-\
-                </div>\
-\
-                \{/* Right Column: Hydration, Weight, & Training */\}\
-                \{\}\
-                <div className="space-y-8">\
-                  \
-                  \{/* Daily Weight Logger */\}\
-                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">\
-                    <h3 className="text-md font-bold text-slate-200 mb-4">\uc0\u9878 \u65039  \u20170 \u26085 \u39636 \u37325 \u32000 \u37636 </h3>\
-                    <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between">\
-                      <div>\
-                        <span className="text-xs text-slate-400 block">\uc0\u30446 \u21069 \u35352 \u37636 \u39636 \u37325 </span>\
-                        <div className="flex items-baseline gap-1 mt-1">\
-                          <input\
-                            type="number"\
-                            step="0.1"\
-                            value=\{currentWeightInput\}\
-                            onChange=\{handleWeightChange\}\
-                            className="bg-transparent text-2xl font-black text-emerald-400 focus:outline-none w-20 border-b border-dashed border-slate-700"\
-                          />\
-                          <span className="text-xs text-slate-400">kg</span>\
-                        </div>\
-                      </div>\
-                      <span className="text-[10px] text-slate-500 text-right">\uc0\u26356 \u25913 \u39636 \u37325 \u26371 \u33258 \u21205 \u37325 \u35336 <br/>\u22522 \u30990  BMR \u20195 \u35613 </span>\
-                    </div>\
-                  </div>\
-\
-                  \{/* Water Hydration */\}\
-                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">\
-                    <h3 className="text-md font-bold text-slate-200 mb-3">\uc0\u55357 \u56487  \u27599 \u26085 \u27700 \u20998 \u25885 \u21462 \u37327 </h3>\
-                    <div className="text-center py-2">\
-                      <div className="text-2xl font-black text-sky-400">\{todayLog.water\} / 2500 <span className="text-xs font-normal text-slate-400">ml</span></div>\
-                      <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden mt-2 mb-4">\
-                        <div className="bg-gradient-to-r from-sky-500 to-cyan-400 h-full rounded-full transition-all duration-300" style=\{\{ width: `$\{Math.min(100, (todayLog.water / 2500) * 100)\}%` \}\}></div>\
-                      </div>\
-                      <div className="flex gap-2 justify-center">\
-                        <button onClick=\{() => adjustWater(250)\} className="px-3 py-1.5 bg-sky-950/50 border border-sky-500/20 hover:bg-sky-900 text-sky-300 font-bold text-xs rounded-xl transition">\uc0\u65291  250ml</button>\
-                        <button onClick=\{() => adjustWater(600)\} className="px-3 py-1.5 bg-cyan-950/50 border border-cyan-500/20 hover:bg-cyan-900 text-cyan-300 font-bold text-xs rounded-xl transition">\uc0\u65291  600ml</button>\
-                        <button onClick=\{() => adjustWater(-250)\} className="px-2 py-1.5 bg-slate-950 hover:bg-slate-900 text-slate-400 text-xs rounded-xl transition">\uc0\u65293 </button>\
-                      </div>\
-                    </div>\
-                  </div>\
-\
-                  \{/* Training Workout tracker */\}\
-                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">\
-                    <h3 className="text-md font-bold text-slate-200 mb-4">\uc0\u55356 \u57291 \u65039  \u35347 \u32244 \u36939 \u21205 \u35352 \u37636 </h3>\
-                    \
-                    \{todayLog.exercise ? (\
-                      <div className="bg-slate-950 p-4 border border-slate-850 rounded-2xl relative">\
-                        <div className="flex items-center gap-3">\
-                          <span className="text-2xl">\uc0\u55357 \u56490 </span>\
-                          <div>\
-                            <h4 className="font-bold text-slate-200">\
-                              \{todayLog.exercise.type === 'strength' ? '\uc0\u37325 \u35347 \u32908 \u21147 \u38459 \u21147 ' : todayLog.exercise.type === 'cardio' ? '\u26377 \u27687 \u32784 \u21147 \u36939 \u21205 ' : '\u37325 \u35347 +\u26377 \u27687 \u38617 \u35347 \u32244 '\}\
-                            </h4>\
-                            <p className="text-xs text-slate-400">\uc0\u26178 \u38291 : \{todayLog.exercise.duration\} \u20998 \u37912  | \u24375 \u24230 : \{todayLog.exercise.intensity\}</p>\
-                          </div>\
-                        </div>\
-                        \{todayLog.exercise.notes && <p className="text-xs italic text-slate-500 border-t border-slate-900 mt-2 pt-2">"\{todayLog.exercise.notes\}"</p>\}\
-                        <div className="mt-3 bg-emerald-500/10 text-emerald-400 font-black text-xs py-2 px-3 rounded-lg flex justify-between">\
-                          <span>\uc0\u55357 \u56613  \u29554 \u24471 \u21345 \u36335 \u37324 \u35036 \u20767 \u65306 </span>\
-                          <span>+\{todayLog.exercise.caloriesBurned\} kcal</span>\
-                        </div>\
-                        <button onClick=\{removeExercise\} className="absolute top-2 right-2 text-xs text-slate-500 hover:text-rose-400 p-1">\uc0\u10005 </button>\
-                      </div>\
-                    ) : (\
-                      <form onSubmit=\{handleExerciseSubmit\} className="space-y-4">\
-                        <div>\
-                          <label className="block text-xs text-slate-400 font-bold mb-1">\uc0\u35347 \u32244 \u27169 \u24335 </label>\
-                          <select value=\{exerciseForm.type\} onChange=\{(e) => setExerciseForm(prev => (\{...prev, type: e.target.value\}))\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300">\
-                            <option value="strength">\uc0\u55356 \u57291 \u65039  \u37325 \u35347  (\u38459 \u21147 \u35347 \u32244 )</option>\
-                            <option value="cardio">\uc0\u55356 \u57283  \u26377 \u27687 \u36939 \u21205  (\u36305 \u27493 /\u21934 \u36554 )</option>\
-                            <option value="both">\uc0\u9889  \u37117 \u26377  (\u37325 \u35347  + \u26377 \u27687 \u38617 \u31649 \u40778 \u19979 )</option>\
-                          </select>\
-                        </div>\
-                        <div className="grid grid-cols-2 gap-3">\
-                          <div>\
-                            <label className="block text-xs text-slate-400 font-bold mb-1">\uc0\u26178 \u38291  (\u20998 \u37912 )</label>\
-                            <input type="number" value=\{exerciseForm.duration\} onChange=\{(e) => setExerciseForm(prev => (\{...prev, duration: parseInt(e.target.value) || 0\}))\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" min="1" />\
-                          </div>\
-                          <div>\
-                            <label className="block text-xs text-slate-400 font-bold mb-1">\uc0\u24375 \u24230 \u31561 \u32026 </label>\
-                            <select value=\{exerciseForm.intensity\} onChange=\{(e) => setExerciseForm(prev => (\{...prev, intensity: e.target.value\}))\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300">\
-                              <option value="low">\uc0\u20302  (\u24494 \u27735 )</option>\
-                              <option value="medium">\uc0\u20013  (\u21628 \u21560 \u24494 \u21912 )</option>\
-                              <option value="high">\uc0\u39640  (\u29190 \u27735 \u30130 \u21147 )</option>\
-                            </select>\
-                          </div>\
-                        </div>\
-                        <div>\
-                          <label className="block text-xs text-slate-400 font-bold mb-1">\uc0\u31777 \u30701 \u20633 \u35387  (\u36984 \u22635 )</label>\
-                          <input type="text" placeholder="\uc0\u20363 \u65306 \u28145 \u36466 \u12289 \u30828 \u33289 \u33287 \u26377 \u27687  20\u20998 " value=\{exerciseForm.notes\} onChange=\{(e) => setExerciseForm(prev => (\{...prev, notes: e.target.value\}))\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" />\
-                        </div>\
-                        <button type="submit" className="w-full py-2 bg-slate-800 border border-slate-700/60 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition">\uc0\u20786 \u23384 \u36939 \u21205 \u65292 \u35036 \u20767 \u29105 \u37327 \u38989 \u24230  \u55357 \u56490 </button>\
-                      </form>\
-                    )\}\
-                  </div>\
-\
-                </div>\
-              </div>\
-            )\}\
-\
-            \{/* ==========================================\
-                TAB: AI MEAL ANALYZER\
-               ========================================== */\}\
-            \{\}\
-            \{activeTab === 'analyzer' && (\
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">\
-                \
-                \{/* Left panel (Camera, upload, mock preset select) */\}\
-                <div className="lg:col-span-7 space-y-6">\
-                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">\
-                    <div className="flex justify-between items-center mb-2">\
-                      <h3 className="text-lg font-bold text-slate-100">\uc0\u55357 \u56568  \u25293 \u25885 \u25110 \u19978 \u20659 \u39135 \u29289 \u29031 \u29255 </h3>\
-                      <button onClick=\{() => \{\
-                        const k = prompt("\uc0\u35531 \u36664 \u20837 \u24744 \u30340  Google Gemini API Key:", tempApiKey);\
-                        if (k !== null) \{\
-                          setTempApiKey(k);\
-                          showToast("\uc0\u24050 \u26283 \u23384  API Key\u65292 \u21363 \u21051 \u35299 \u37782 \u30495 \u23526 \u26234 \u24935 \u25293 \u29031 \u20998 \u26512 \u65281 ");\
-                        \}\
-                      \}\} className="text-[10px] bg-slate-800 hover:bg-slate-750 text-slate-400 px-2.5 py-1 rounded-lg transition">\uc0\u55357 \u56593  \u35373 \u23450  API Key</button>\
-                    </div>\
-                    <p className="text-xs text-slate-400 mb-6">\uc0\u21033 \u29992  Google AI \u24555 \u36895 \u35672 \u21029 \u30436 \u20013 \u39143 \u65292 \u24171 \u24744 \u20272 \u31639 \u29105 \u37327 \u12289 \u19977 \u22823 \u29151 \u39178 \u32032 \u37197 \u27604 \u20006 \u25552 \u20379 \u26368 \u31185 \u23416 \u30340 \u39154 \u39135 \u25913 \u21892 \u24847 \u35211 \u12290 </p>\
-\
-                    \{/* Meal category selects */\}\
-                    <div className="mb-6">\
-                      <span className="block text-xs text-slate-400 font-bold uppercase mb-2">\uc0\u39184 \u27425 \u35373 \u23450 </span>\
-                      <div className="grid grid-cols-4 gap-2">\
-                        \{['breakfast', 'lunch', 'dinner', 'snack'].map((type) => (\
-                          <button key=\{type\} onClick=\{() => setMealType(type)\} className=\{`py-2 px-1 rounded-xl text-xs font-bold border transition $\{mealType === type ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'\}`\}>\
-                            \{type === 'breakfast' && '\uc0\u55356 \u57093  \u26089 \u39184 '\}\
-                            \{type === 'lunch' && '\uc0\u9728 \u65039  \u21320 \u39184 '\}\
-                            \{type === 'dinner' && '\uc0\u55356 \u57113  \u26202 \u39184 '\}\
-                            \{type === 'snack' && '\uc0\u55356 \u57166  \u40670 \u24515 '\}\
-                          </button>\
-                        ))\}\
-                      </div>\
-                    </div>\
-\
-                    \{/* Capture Panel Area */\}\
-                    <div className="border-2 border-dashed border-slate-800 rounded-3xl bg-slate-950 overflow-hidden relative">\
-                      \{cameraActive ? (\
-                        <div className="relative">\
-                          <video ref=\{videoRef\} autoPlay playsInline className="w-full aspect-video object-cover bg-black" />\
-                          <div className="absolute bottom-4 inset-x-0 flex justify-center gap-3">\
-                            <button onClick=\{capturePhoto\} className="px-5 py-2.5 bg-emerald-500 text-slate-950 font-black text-xs rounded-full shadow-lg">\uc0\u55357 \u56568  \u21363 \u21051 \u25293 \u25885 </button>\
-                            <button onClick=\{stopCamera\} className="px-3 py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-300 font-semibold text-xs rounded-full">\uc0\u21462 \u28040 </button>\
-                          </div>\
-                        </div>\
-                      ) : capturedImage ? (\
-                        <div className="relative p-4">\
-                          <img src=\{capturedImage\} alt="Captured food preview" className="w-full max-h-72 object-contain rounded-2xl bg-black" />\
-                          <button onClick=\{() => setCapturedImage(null)\} className="absolute top-6 right-6 p-2 bg-slate-950/80 hover:bg-slate-900 rounded-full text-xs text-slate-300 transition">\uc0\u10005  \u31227 \u38500 \u37325 \u36984 </button>\
-                        </div>\
-                      ) : (\
-                        <div className="py-12 text-center flex flex-col items-center justify-center px-4">\
-                          <span className="text-4xl block mb-3">\uc0\u55358 \u56663 </span>\
-                          <p className="text-slate-300 font-semibold mb-1">\uc0\u23578 \u26410 \u36984 \u21462 \u39184 \u40670 \u30456 \u29255 </p>\
-                          <p className="text-[10px] text-slate-500 max-w-sm mb-6">\uc0\u24744 \u21487 \u20197 \u20351 \u29992 \u38651 \u33126 /\u25163 \u27231 \u37857 \u38957 \u29694 \u25293 \u65292 \u19978 \u20659 \u26412 \u27231 \u22294 \u27284 \u65292 \u25110 \u22312 \u19979 \u26041 \u40670 \u25802 \u31934 \u36984 \u32654 \u39135 \u30452 \u25509 \u39636 \u39511  AI \u30340 \u21028 \u26039 \u32080 \u26524 \u65281 </p>\
-                          <div className="flex flex-wrap gap-2 justify-center">\
-                            <button onClick=\{startCamera\} className="px-4 py-2 bg-slate-800 hover:bg-slate-750 border border-slate-750 text-slate-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">\uc0\u55357 \u56567  \u21855 \u29992 \u30456 \u27231 </button>\
-                            <label className="px-4 py-2 bg-slate-800 hover:bg-slate-750 border border-slate-750 text-slate-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer">\
-                              \uc0\u55357 \u56514  \u19978 \u20659 \u29031 \u29255 \
-                              <input type="file" accept="image/*" onChange=\{handleFileUpload\} className="hidden" />\
-                            </label>\
-                          </div>\
-                        </div>\
-                      )\}\
-                      <canvas ref=\{canvasRef\} className="hidden" />\
-                    </div>\
-\
-                    \{/* Pre-made mocks for trial */\}\
-                    <div className="mt-6 border-t border-slate-800/80 pt-6">\
-                      <div className="flex items-center justify-between mb-3">\
-                        <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">\uc0\u55357 \u56481  \u20813 \u29031 \u24555 \u36895 \u27169 \u25836 \u39636 \u39511 \u21312  (\u24375 \u28872 \u25512 \u34214 \u28961 \u37329 \u38000 \u28204 \u35430 )</span>\
-                      </div>\
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">\
-                        \{PRESET_FOODS.map((food, idx) => (\
-                          <button key=\{idx\} onClick=\{() => usePresetFood(food)\} className="bg-slate-950 border border-slate-800 hover:border-emerald-500/30 p-2 rounded-xl text-left transition flex items-center gap-2">\
-                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-800 flex-shrink-0">\
-                              <img src=\{food.image\} alt=\{food.name\} className="w-full h-full object-cover" />\
-                            </div>\
-                            <div className="min-w-0">\
-                              <h4 className="text-xs font-bold text-slate-200 truncate">\{food.name\}</h4>\
-                              <span className="text-[9px] text-emerald-400 font-semibold">\{food.calories\} kcal</span>\
-                            </div>\
-                          </button>\
-                        ))\}\
-                      </div>\
-                    </div>\
-\
-                    \{/* Process Action button */\}\
-                    \{capturedImage && !analysisResult && (\
-                      <div className="mt-6">\
-                        <button\
-                          onClick=\{() => analyzeImageWithGemini(capturedImage)\}\
-                          disabled=\{isAnalyzing\}\
-                          className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black rounded-xl shadow-lg transition flex items-center justify-center gap-2"\
-                        >\
-                          \{isAnalyzing ? (\
-                            <>\
-                              <svg className="animate-spin h-4 w-4 text-slate-950" fill="none" viewBox="0 0 24 24">\
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>\
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>\
-                              </svg>\
-                              Gemini \uc0\u26234 \u33021 \u21345 \u36335 \u37324 \u31934 \u31639 \u20013 ...\
-                            </>\
-                          ) : (\
-                            <>\uc0\u55358 \u56964  \u40670 \u25802 \u21855 \u21205  AI \u21345 \u36335 \u37324 \u21028 \u26039 </>\
-                          )\}\
-                        </button>\
-                      </div>\
-                    )\}\
-                  </div>\
-\
-                  \{/* Manual Backup form */\}\
-                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">\
-                    <h4 className="text-xs font-bold text-slate-300 uppercase mb-3">\uc0\u9997 \u65039  \u25163 \u21205 \u24555 \u36895 \u36664 \u20837 \u29105 \u37327 \u26126 \u32048  (\u20813 \u25293 \u29031 )</h4>\
-                    <form onSubmit=\{handleManualAdd\} className="space-y-4">\
-                      <div>\
-                        <label className="block text-xs text-slate-400 mb-1">\uc0\u33756 \u33394 /\u39135 \u29289 \u21517 \u31281 </label>\
-                        <input type="text" placeholder="\uc0\u20363 \u65306 \u28961 \u31958 \u40657 \u21654 \u21857 \u33287 \u33655 \u21253 \u34507 \u20108 \u38982 " value=\{manualMeal.name\} onChange=\{(e) => setManualMeal(p => (\{...p, name: e.target.value\}))\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" />\
-                      </div>\
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">\
-                        <div>\
-                          <label className="block text-[10px] text-slate-400 mb-1">\uc0\u29105 \u37327 (kcal)</label>\
-                          <input type="number" placeholder="kcal" value=\{manualMeal.calories\} onChange=\{(e) => setManualMeal(p => (\{...p, calories: e.target.value\}))\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-slate-300" />\
-                        </div>\
-                        <div>\
-                          <label className="block text-[10px] text-slate-400 mb-1">\uc0\u34507 \u30333 (g)</label>\
-                          <input type="number" placeholder="g" value=\{manualMeal.protein\} onChange=\{(e) => setManualMeal(p => (\{...p, protein: e.target.value\}))\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-slate-300" />\
-                        </div>\
-                        <div>\
-                          <label className="block text-[10px] text-slate-400 mb-1">\uc0\u30899 \u27700 (g)</label>\
-                          <input type="number" placeholder="g" value=\{manualMeal.carbs\} onChange=\{(e) => setManualMeal(p => (\{...p, carbs: e.target.value\}))\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-slate-300" />\
-                        </div>\
-                        <div>\
-                          <label className="block text-[10px] text-slate-400 mb-1">\uc0\u33026 \u32938 (g)</label>\
-                          <input type="number" placeholder="g" value=\{manualMeal.fat\} onChange=\{(e) => setManualMeal(p => (\{...p, fat: e.target.value\}))\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-slate-300" />\
-                        </div>\
-                      </div>\
-                      <button type="submit" className="w-full py-2 bg-slate-800 hover:bg-slate-750 text-slate-300 text-xs font-bold rounded-xl border border-slate-700/60">\uc0\u25163 \u21205 \u20786 \u23384 \u21040 \u20170 \u26085 \u26085 \u35468 </button>\
-                    </form>\
-                  </div>\
-                </div>\
-\
-                \{/* Right panel (Result output with nutrition feedback) */\}\
-                \{\}\
-                <div className="lg:col-span-5">\
-                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl sticky top-24 min-h-[350px]">\
-                    <h3 className="text-md font-bold text-slate-300 border-b border-slate-800 pb-3 mb-4">\uc0\u55356 \u57213 \u65039  AI \u20272 \u31639 \u33287 \u39636 \u38613 \u24314 \u35696 </h3>\
-                    \
-                    \{isAnalyzing ? (\
-                      <div className="flex flex-col items-center justify-center text-center py-16">\
-                        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>\
-                        <h4 className="text-sm font-bold text-slate-200">\uc0\u27491 \u22312 \u20998 \u26512 \u39184 \u40670 \u20013 ...</h4>\
-                        <p className="text-[10px] text-slate-500 mt-1 max-w-xs">\uc0\u27491 \u22312 \u20998 \u26512 \u22294 \u29255 \u20811 \u25976 \u12289 \u39135 \u29289 \u32068 \u25104 \u21450 \u29151 \u39178 \u32032 \u20998 \u37197 </p>\
-                      </div>\
-                    ) : analysisResult ? (\
-                      <div className="space-y-4">\
-                        <div>\
-                          <span className="text-[10px] text-slate-400">\uc0\u25512 \u20272 \u20027 \u35201 \u39135 \u29289 \u65306 </span>\
-                          <h4 className="text-lg font-extrabold text-emerald-400 mt-0.5">\{analysisResult.name || analysisResult.foodName\}</h4>\
-                        </div>\
-\
-                        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between">\
-                          <div>\
-                            <span className="text-[10px] text-slate-400">\uc0\u32317 \u29105 \u37327 </span>\
-                            <div className="text-2xl font-black text-slate-200">\{analysisResult.calories\} <span className="text-xs font-normal text-slate-500">kcal</span></div>\
-                          </div>\
-                          <div className="flex gap-2">\
-                            <div className="bg-slate-900 px-2 py-1 rounded text-center">\
-                              <span className="block text-[9px] text-slate-500">\uc0\u55356 \u57175  \u34507 \u30333 </span>\
-                              <span className="text-xs font-bold text-slate-300">\{analysisResult.protein\}g</span>\
-                            </div>\
-                            <div className="bg-slate-900 px-2 py-1 rounded text-center">\
-                              <span className="block text-[9px] text-slate-500">\uc0\u55356 \u57150  \u30899 \u27700 </span>\
-                              <span className="text-xs font-bold text-slate-300">\{analysisResult.carbs\}g</span>\
-                            </div>\
-                            <div className="bg-slate-900 px-2 py-1 rounded text-center">\
-                              <span className="block text-[9px] text-slate-500">\uc0\u55358 \u56657  \u33026 \u32938 </span>\
-                              <span className="text-xs font-bold text-slate-300">\{analysisResult.fat\}g</span>\
-                            </div>\
-                          </div>\
-                        </div>\
-\
-                        <div className="bg-slate-950/50 p-3.5 rounded-xl border border-slate-850 text-xs text-slate-400 leading-relaxed">\
-                          <strong className="text-slate-300 block mb-1">\uc0\u55357 \u56589  \u20221 \u37327 \u20839 \u23481 \u20998 \u26512 \u65306 </strong>\
-                          \{analysisResult.analysis\}\
-                        </div>\
-\
-                        <div className="bg-emerald-950/20 p-3.5 rounded-xl border border-emerald-900/30 text-xs text-slate-400 leading-relaxed">\
-                          <strong className="text-emerald-400 block mb-1">\uc0\u55357 \u56481  \u39636 \u22411 \u38613 \u22609 \u22686 \u32908 \u28187 \u33026 \u22238 \u39243 \u65306 </strong>\
-                          \{analysisResult.advice\}\
-                        </div>\
-\
-                        <div className="flex gap-3 pt-2">\
-                          <button onClick=\{saveAnalyzedMealToLog\} className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs rounded-xl transition">\uc0\u10004  \u30331 \u37636 \u21040 \u20170 \u26085 \u26085 \u35468 </button>\
-                          <button onClick=\{() => \{ setCapturedImage(null); setAnalysisResult(null); \}\} className="px-3 py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-400 text-xs rounded-xl">\uc0\u37325 \u36984 </button>\
-                        </div>\
-                      </div>\
-                    ) : (\
-                      <div className="py-16 text-center border border-dashed border-slate-850 rounded-3xl bg-slate-950/10">\
-                        <span className="text-3xl block mb-2">\uc0\u55357 \u56568 </span>\
-                        <p className="text-xs text-slate-400">\uc0\u30446 \u21069 \u23578 \u28961  AI \u20998 \u26512 \u25976 \u25818 </p>\
-                        <p className="text-[10px] text-slate-500 mt-1 max-w-xs mx-auto">\uc0\u35531 \u22312 \u24038 \u20596 \u40670 \u36984 \u12300 \u30456 \u27231 \u25293 \u29031 \u12301 \u12289 \u12300 \u19978 \u20659 \u29031 \u29255 \u12301 \u25110 \u19968 \u37749 \u22871 \u29992 \u27169 \u25836 \u35430 \u29992 \u65292 \u20006 \u25353 \u19979  AI \u36776 \u35672 \u21345 \u36335 \u37324 \u65281 </p>\
-                      </div>\
-                    )\}\
-                  </div>\
-                </div>\
-\
-              </div>\
-            )\}\
-\
-            \{/* ==========================================\
-                TAB: TDEE CALCULATOR\
-               ========================================== */\}\
-            \{\}\
-            \{activeTab === 'calculator' && (\
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">\
-                \
-                \{/* Parameters panel */\}\
-                <div className="lg:col-span-7">\
-                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">\
-                    <h3 className="text-lg font-bold text-slate-100 mb-6">\uc0\u9881 \u65039  \u33258 \u35330 \u24744 \u30340 \u39636 \u33026 \u38613 \u22609 \u29983 \u29702 \u25976 \u20540 </h3>\
-                    <form className="space-y-6">\
-                      <div className="grid grid-cols-2 gap-4">\
-                        <div>\
-                          <label className="block text-xs text-slate-400 font-bold uppercase mb-1">\uc0\u29983 \u29702 \u24615 \u21029 </label>\
-                          <div className="grid grid-cols-2 gap-2">\
-                            \{['male', 'female'].map(g => (\
-                              <button key=\{g\} type="button" onClick=\{() => handleProfileChange(\{ target: \{ name: 'gender', value: g \}\})\} className=\{`py-2 px-3 rounded-xl text-xs font-bold border transition $\{userProfile.gender === g ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-slate-950 border-slate-800 text-slate-400'\}`\}>\
-                                \{g === 'male' ? '\uc0\u55357 \u56424  \u30007 \u24615 ' : '\u55357 \u56425  \u22899 \u24615 '\}\
-                              </button>\
-                            ))\}\
-                          </div>\
-                        </div>\
-                        <div>\
-                          <label className="block text-xs text-slate-400 font-bold uppercase mb-1">\uc0\u24180 \u40801  (\u27506 )</label>\
-                          <input type="number" name="age" value=\{userProfile.age\} onChange=\{handleProfileChange\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" min="1" />\
-                        </div>\
-                      </div>\
-\
-                      <div className="grid grid-cols-2 gap-4">\
-                        <div>\
-                          <label className="block text-xs text-slate-400 font-bold uppercase mb-1">\uc0\u36523 \u39640  (cm)</label>\
-                          <input type="number" name="height" value=\{userProfile.height\} onChange=\{handleProfileChange\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" min="1" />\
-                        </div>\
-                        <div>\
-                          <label className="block text-xs text-slate-400 font-bold uppercase mb-1">\uc0\u30446 \u21069 \u39636 \u37325  (kg)</label>\
-                          <input type="number" name="weight" value=\{userProfile.weight\} onChange=\{handleProfileChange\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" min="1" />\
-                        </div>\
-                      </div>\
-\
-                      <div>\
-                        <label className="block text-xs text-slate-400 font-bold uppercase mb-1">\uc0\u26085 \u24120 \u27963 \u21205 \u31243 \u24230 </label>\
-                        <select name="activityLevel" value=\{userProfile.activityLevel\} onChange=\{handleProfileChange\} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300">\
-                          <option value="1.2">\uc0\u20037 \u22352 \u28961 \u35215 \u24459 \u36939 \u21205  (1.2)</option>\
-                          <option value="1.375">\uc0\u36629 \u24230 \u27963 \u21205 \u65306 \u27599 \u36913 \u36939 \u21205  1-3 \u22825  (1.375)</option>\
-                          <option value="1.55">\uc0\u20013 \u24230 \u27963 \u21205 \u65306 \u27599 \u36913 \u28608 \u28872 \u36939 \u21205  3-5 \u22825  (1.55) \u55357 \u56481  \u25512 \u34214 \u37325 \u35347 \u26377 \u27687 \u26063 </option>\
-                          <option value="1.725">\uc0\u39640 \u24230 \u27963 \u21205 \u65306 \u27599 \u36913 \u28608 \u28872 \u37325 \u35347 \u26377 \u27687  6-7 \u22825  (1.725)</option>\
-                        </select>\
-                      </div>\
-\
-                      <div>\
-                        <label className="block text-xs text-slate-400 font-bold uppercase mb-1">\uc0\u28187 \u37325 \u38613 \u22609 \u38542 \u27573 \u35336 \u30059 </label>\
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">\
-                          \{[\
-                            \{ id: 'lose_fat', title: '\uc0\u9986 \u65039  \u28187 \u33026 \u22609 \u22411 ', desc: '\u29105 \u37327 \u36196 \u23383  (\u32004  TDEE - 400)' \},\
-                            \{ id: 'maintain', title: '\uc0\u55358 \u56792  \u32173 \u25345 \u39636 \u24907 ', desc: '\u29105 \u37327 \u24179 \u34913  (\u27599 \u26085 \u26085 \u24120 \u29105 \u37327 )' \},\
-                            \{ id: 'build_muscle', title: '\uc0\u55357 \u56490  \u20094 \u28136 \u22686 \u32908 ', desc: '\u29105 \u37327 \u30408 \u39192  (\u32004  TDEE + 300)' \}\
-                          ].map(goalOpt => (\
-                            <button key=\{goalOpt.id\} type="button" onClick=\{() => handleProfileChange(\{ target: \{ name: 'goal', value: goalOpt.id \}\})\} className=\{`p-3 rounded-xl text-left border transition $\{userProfile.goal === goalOpt.id ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-slate-950 border-slate-800 text-slate-400'\}`\}>\
-                              <div className="font-bold text-xs">\{goalOpt.title\}</div>\
-                              <div className="text-[9px] opacity-70 mt-0.5">\{goalOpt.desc\}</div>\
-                            </button>\
-                          ))\}\
-                        </div>\
-                      </div>\
-                    </form>\
-                  </div>\
-                </div>\
-\
-                \{/* Output indicator specs card */\}\
-                \{\}\
-                <div className="lg:col-span-5">\
-                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl sticky top-24 space-y-6">\
-                    <h3 className="text-md font-bold text-slate-300 pb-3 border-b border-slate-800">\uc0\u55356 \u57263  \u23560 \u23660 \u36939 \u21205 \u38613 \u22609 \u39154 \u39135 \u22823 \u32177 </h3>\
-                    \
-                    <div className="grid grid-cols-2 gap-4">\
-                      <div className="bg-slate-950 p-4 rounded-xl border border-slate-850">\
-                        <span className="text-[10px] text-slate-400 block">\uc0\u22522 \u30990 \u20195 \u35613  (BMR)</span>\
-                        <span className="text-lg font-black text-slate-200 mt-1">\{userProfile.bmr\} <span className="text-xs font-normal text-slate-500">kcal</span></span>\
-                      </div>\
-                      <div className="bg-slate-950 p-4 rounded-xl border border-slate-850">\
-                        <span className="text-[10px] text-slate-400 block">\uc0\u27599 \u26085 \u32317 \u29105 \u37327  (TDEE)</span>\
-                        <span className="text-lg font-black text-teal-400 mt-1">\{userProfile.tdee\} <span className="text-xs font-normal text-slate-500">kcal</span></span>\
-                      </div>\
-                    </div>\
-\
-                    <div className="bg-gradient-to-tr from-emerald-950/40 to-teal-950/40 p-4 rounded-xl border border-emerald-500/10">\
-                      <span className="text-[10px] text-slate-300 block">\uc0\u55357 \u56481  \u25512 \u34214 \u39636 \u38613 \u26399 \u27599 \u26085 \u21345 \u36335 \u37324 \u25885 \u21462 \u30446 \u27161 \u65306 </span>\
-                      <div className="text-2xl font-black text-emerald-400 mt-1">\{userProfile.targetCalories\} <span className="text-xs font-normal text-slate-400">kcal</span></div>\
-                      <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">\uc0\u27492 \u29105 \u37327 \u24050 \u38928 \u30041 \u36969 \u24230 \u30340 \u36196 \u23383 \u21312 \u38291 \u65292 \u35731 \u24744 \u27599 \u26085 \u32173 \u25345 \u39640 \u24375 \u24230 \u38459 \u21147 \u35347 \u32244 \u26178 \u65292 \u26082 \u33021 \u20445 \u30041 \u23542 \u36020 \u30340 \u32908 \u32905 \u65292 \u21448 \u33021 \u31337 \u23450 \u29123 \u29138 \u22810 \u39192 \u33026 \u32938 \u33026 \u32938 \u12290 </p>\
-                    </div>\
-\
-                    <div className="space-y-2">\
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">\uc0\u40643 \u37329 \u24040 \u37327 \u20998 \u37197  (35/35/30 \u39636 \u22411 \u38613 \u22609 \u39184 \u27161 )</span>\
-                      <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between">\
-                        <span className="text-xs text-slate-400">\uc0\u55356 \u57175  \u34507 \u30333 \u36074 \u25885 \u21462  (\u32908 \u32905 \u20462 \u35036 )</span>\
-                        <span className="text-xs font-bold text-emerald-400">\{userProfile.targetProtein\} g</span>\
-                      </div>\
-                      <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between">\
-                        <span className="text-xs text-slate-400">\uc0\u55356 \u57150  \u30899 \u27700 \u21270 \u21512 \u29289  (\u29190 \u30332 \u33287 \u26377 \u27687 \u33021 )</span>\
-                        <span className="text-xs font-bold text-cyan-400">\{userProfile.targetCarbs\} g</span>\
-                      </div>\
-                      <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between">\
-                        <span className="text-xs text-slate-400">\uc0\u55358 \u56657  \u20581 \u24247 \u22909 \u33026 \u32938  (\u20839 \u20998 \u27852 \u24646 \u23450 )</span>\
-                        <span className="text-xs font-bold text-amber-400">\{userProfile.targetFat\} g</span>\
-                      </div>\
-                    </div>\
-                  </div>\
-                </div>\
-\
-              </div>\
-            )\}\
-\
-            \{/* ==========================================\
-                TAB: HISTORY & ANALYTICS\
-               ========================================== */\}\
-            \{\}\
-            \{activeTab === 'history' && (\
-              <div className="space-y-8">\
-                \
-                \{/* Graphical SVG Linechart trend */\}\
-                <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">\
-                  <h3 className="text-md font-bold text-slate-200 mb-6">\uc0\u55357 \u56520  \u39636 \u37325 \u21450 \u29105 \u37327 \u27874 \u21205 \u36264 \u21218 \u22294 \u34920 </h3>\
-                  \{Object.keys(dailyLogs).length < 2 ? (\
-                    <div className="text-center py-12 bg-slate-950/40 border border-dashed border-slate-800 rounded-2xl">\
-                      <span className="text-3xl block mb-2">\uc0\u55357 \u56522 </span>\
-                      <p className="text-xs text-slate-400">\uc0\u32047 \u31309 \u33267 \u23569 \u20841 \u26085 \u20197 \u19978 \u30340 \u32000 \u37636 \u24460 \u65292 \u27492 \u34389 \u23559 \u33258 \u21205 \u29986 \u29983 \u21205 \u24907 \u36264 \u21218 \u26354 \u32218 \u22294 \u34920 \u21908 \u65281 </p>\
-                      <p className="text-[10px] text-slate-500 mt-1">\uc0\u24744 \u21487 \u20197 \u21033 \u29992 \u19978 \u26041 \u26085 \u26399 \u21015 \u65292 \u25163 \u21205 \u28858 \u26152 \u22825 \u25110 \u21069 \u22825 \u22635 \u20837 \u25976 \u20540 \u20358 \u24555 \u36895 \u27169 \u25836 \u29983 \u25104 \u12290 </p>\
-                    </div>\
-                  ) : (\
-                    <div className="h-60 w-full bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">\
-                      <span className="text-xs text-slate-400">\uc0\u39636 \u37325 \u19979 \u38477 \u36264 \u21218 \u35352 \u37636 \u32218  (kg)</span>\
-                      \
-                      <div className="flex-1 relative flex items-end justify-between px-4 pb-2 pt-4 border-b border-l border-slate-800">\
-                        \{/* Custom interactive SVG points */\}\
-                        <svg className="absolute inset-0 w-full h-full p-4 overflow-visible" preserveAspectRatio="none">\
-                          \{(() => \{\
-                            const sortedDates = Object.keys(dailyLogs).sort();\
-                            const weights = sortedDates.map(d => dailyLogs[d].weight || userProfile.weight);\
-                            const minW = Math.min(...weights) - 1;\
-                            const maxW = Math.max(...weights) + 1;\
-                            const range = maxW - minW || 1;\
-\
-                            const points = sortedDates.map((date, idx) => \{\
-                              const x = (idx / (sortedDates.length - 1)) * 100;\
-                              const y = 100 - (((weights[idx] - minW) / range) * 100);\
-                              return `$\{x\},$\{y\}`;\
-                            \});\
-\
-                            return (\
-                              <>\
-                                <polyline fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"\
-                                  points=\{points.map(p => \{\
-                                    const [x, y] = p.split(',');\
-                                    return `$\{x\}% $\{y\}%`;\
-                                  \}).join(' ')\}\
-                                />\
-                                \{sortedDates.map((date, idx) => \{\
-                                  const x = `$\{(idx / (sortedDates.length - 1)) * 100\}%`;\
-                                  const y = `$\{100 - (((weights[idx] - minW) / range) * 100)\}%`;\
-                                  return (\
-                                    <circle key=\{date\} cx=\{x\} cy=\{y\} r="5" fill="#10b981" stroke="#0f172a" strokeWidth="2" className="cursor-pointer hover:r-7 transition-all">\
-                                      <title>\{`$\{date\}: $\{weights[idx]\} kg`\}</title>\
-                                    </circle>\
-                                  );\
-                                \})\}\
-                              </>\
-                            );\
-                          \})()\}\
-                        </svg>\
-                      </div>\
-                      <div className="flex justify-between text-[9px] text-slate-500 px-4 mt-2">\
-                        \{Object.keys(dailyLogs).sort().map(d => <span key=\{d\}>\{d.substring(5)\}</span>)\}\
-                      </div>\
-                    </div>\
-                  )\}\
-                </div>\
-\
-                \{/* History\uc0\u26126 \u32048 \u28165 \u21934  */\}\
-                <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">\
-                  <h3 className="text-md font-bold text-slate-200 mb-4">\uc0\u55357 \u56540  \u29983 \u29702 \u33287 \u39154 \u39135 \u27511 \u21490 \u32000 \u37636 \u26126 \u32048 </h3>\
-                  <div className="space-y-4">\
-                    \{Object.keys(dailyLogs).length === 0 ? (\
-                      <p className="text-xs text-slate-500 text-center py-6">\uc0\u26283 \u28961 \u20219 \u20309 \u27511 \u21490 \u25976 \u25818 </p>\
-                    ) : (\
-                      Object.keys(dailyLogs).sort((a,b) => b.localeCompare(a)).map(date => \{\
-                        const log = dailyLogs[date];\
-                        const dayMeals = log.meals || [];\
-                        const dayCalories = dayMeals.reduce((acc, m) => acc + m.calories, 0);\
-                        return (\
-                          <div key=\{date\} className="bg-slate-950 p-4 rounded-xl border border-slate-850 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">\
-                            <div>\
-                              <div className="flex items-center gap-2">\
-                                <span className="text-xs font-bold text-slate-100">\{date\}</span>\
-                                <span className="text-[10px] bg-slate-900 px-2 py-0.5 rounded-full text-slate-400">\uc0\u9878 \u65039  \{log.weight || '\u26410 \u32000 \u37636 '\} kg</span>\
-                              </div>\
-                              <div className="flex gap-4 mt-1 text-[11px] text-slate-500">\
-                                <span>\uc0\u55356 \u57213 \u65039  \u25885 \u21462 \u29105 \u37327 \u65306 <strong className="text-emerald-400">\{dayCalories\} kcal</strong></span>\
-                                <span>\uc0\u55357 \u56487  \u27700 \u20998 \u65306 <strong>\{log.water\} ml</strong></span>\
-                                \{log.exercise && <span className="text-emerald-400">\uc0\u55356 \u57291 \u65039  \u36939 \u21205 \u65306 <strong>\{log.exercise.caloriesBurned\} kcal \u35036 \u20767 </strong></span>\}\
-                              </div>\
-                            </div>\
-                            <button onClick=\{() => \{ setSelectedDate(date); setActiveTab('dashboard'); \}\} className="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold px-3 py-1.5 rounded-lg transition border border-slate-800">\uc0\u26597 \u30475 \u36889 \u22825 </button>\
-                          </div>\
-                        );\
-                      \})\
-                    )\}\
-                  </div>\
-                </div>\
-\
-                \{/* Danger zone / Clear options */\}\
-                <div className="bg-slate-900/50 rounded-3xl border border-rose-950 p-6 shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">\
-                  <div>\
-                    <h4 className="text-xs font-bold text-rose-400">\uc0\u9888 \u65039  \u37325 \u32622 \u20840 \u32178 \u38913 \u36039 \u26009 \u24235 </h4>\
-                    <p className="text-[10px] text-slate-500 mt-1">\uc0\u36889 \u23559 \u26371 \u19968 \u37749 \u28165 \u31354 \u20445 \u23384 \u22312 \u36889 \u37096 \u35373 \u20633 \u19978 \u30340 \u25152 \u26377 \u39636 \u33026 \u26085 \u35468 \u12289 \u27700 \u20998 \u33287 \u37325 \u35347 \u26126 \u32048 \u65292 \u35531 \u35641 \u24910 \u20351 \u29992 \u12290 </p>\
-                  </div>\
-                  <button onClick=\{handleResetAllData\} className="px-4 py-2 bg-rose-950 border border-rose-500/20 text-rose-300 font-bold text-xs rounded-xl hover:bg-rose-900 transition whitespace-nowrap">\uc0\u37325 \u35373 \u25152 \u26377 \u25976 \u25818 </button>\
-                </div>\
-\
-              </div>\
-            )\}\
-\
-          </main>\
-\
-          \{/* Floating nav (for Mobile ergonomics) */\}\
-          <div className="fixed bottom-0 inset-x-0 bg-slate-950/90 backdrop-blur border-t border-slate-900 px-4 py-2 flex justify-around sm:hidden z-30">\
-            <button onClick=\{() => setActiveTab('dashboard')\} className=\{`flex flex-col items-center gap-0.5 $\{activeTab === 'dashboard' ? 'text-emerald-400' : 'text-slate-500'\}`\}>\
-              <span className="text-lg">\uc0\u55357 \u56522 </span>\
-              <span className="text-[9px] font-bold">\uc0\u20736 \u34920 \u26495 </span>\
-            </button>\
-            <button onClick=\{() => setActiveTab('analyzer')\} className=\{`flex flex-col items-center gap-0.5 $\{activeTab === 'analyzer' ? 'text-emerald-400' : 'text-slate-500'\}`\}>\
-              <span className="text-lg">\uc0\u55357 \u56568 </span>\
-              <span className="text-[9px] font-bold">AI\uc0\u25293 \u29031 </span>\
-            </button>\
-            <button onClick=\{() => setActiveTab('calculator')\} className=\{`flex flex-col items-center gap-0.5 $\{activeTab === 'calculator' ? 'text-emerald-400' : 'text-slate-500'\}`\}>\
-              <span className="text-lg">\uc0\u9878 \u65039 </span>\
-              <span className="text-[9px] font-bold">TDEE\uc0\u35336 \u30059 </span>\
-            </button>\
-            <button onClick=\{() => setActiveTab('history')\} className=\{`flex flex-col items-center gap-0.5 $\{activeTab === 'history' ? 'text-emerald-400' : 'text-slate-500'\}`\}>\
-              <span className="text-lg">\uc0\u55357 \u56520 </span>\
-              <span className="text-[9px] font-bold">\uc0\u36264 \u21218 </span>\
-            </button>\
-          </div>\
-\
-        </div>\
-      );\
-    \}\
-\
-    ReactDOM.render(<App />, document.getElementById('root'));\
-  </script>\
-</body>\
-</html>}
+  <style>
+    /* Custom scrollbar for fluid UI */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #0f172a;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 999px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #10b981;
+    }
+    /* Simple custom animations */
+    @keyframes pulse-slow {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.8; transform: scale(1.02); }
+    }
+    .animate-pulse-slow {
+      animation: pulse-slow 3s infinite ease-in-out;
+    }
+  </style>
+</head>
+<body class="bg-slate-950 text-slate-100 min-h-screen font-sans antialiased">
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // --- PRESET SYSTEM DATA ---
+    const apiKey = ""; // Users can inject their personal key at runtime or hardcode here.
+
+    const DEFAULT_USER_PROFILE = {
+      age: 31,
+      gender: 'female',
+      height: 165,
+      weight: 60,
+      activityLevel: '1.55', // Moderately active
+      goal: 'lose_fat', // Target deficit
+      bmr: 1320,
+      tdee: 2046,
+      targetCalories: 1646,
+      targetProtein: 120,
+      targetCarbs: 160,
+      targetFat: 50,
+    };
+
+    const PRESET_FOODS = [
+      {
+        name: "舒肥雞胸肉與地瓜時蔬",
+        image: "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=600&auto=format&fit=crop&q=60",
+        calories: 420,
+        protein: 38,
+        carbs: 45,
+        fat: 8,
+        analysis: "包含舒肥雞胸肉約 150g（優質蛋白質來源），烤地瓜約 120g（低 GI 碳水），以及花椰菜與小番茄。整體膳食纖維豐富，飽足感佳。",
+        advice: "這是一頓非常標準的減脂雕塑餐！蛋白質含量充裕，有助於重訓後的肌肉修復與合成。碳水化合物適中，能為您的有氧運動提供穩定能量。"
+      },
+      {
+        name: "香煎鮭魚配藜麥糙米飯",
+        image: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=600&auto=format&fit=crop&q=60",
+        calories: 550,
+        protein: 32,
+        carbs: 50,
+        fat: 22,
+        analysis: "煎鮭魚排約 130g 提供豐富的 Omega-3 脂肪酸與蛋白質，搭配藜麥糙米飯約 1碗，以及蘆筍與油漬番茄。",
+        advice: "鮭魚的優質脂肪對荷爾蒙健康與關節修復極佳（適合每日重訓的您）。若要加強減脂，可以稍微減少烹調用油，但此組合營養極為均衡！"
+      },
+      {
+        name: "無糖優格燕麥水果碗",
+        image: "https://images.unsplash.com/photo-1488477181946-6428a0291777?w=600&auto=format&fit=crop&q=60",
+        calories: 320,
+        protein: 18,
+        carbs: 48,
+        fat: 6,
+        analysis: "希臘式無糖優格約 200g，燕麥片 30g，綜合莓果與奇異果。點綴少量堅果碎。",
+        advice: "非常適合作為早餐或運動前的小點心。莓果富含抗氧化物，能減緩激烈重訓帶來的肌肉發炎，希臘優格則提供了緩釋酪蛋白，持續滋養肌肉。"
+      }
+    ];
+
+    // --- MAIN REACT COMPONENT ---
+    function App() {
+      const [userProfile, setUserProfile] = useState(() => {
+        const saved = localStorage.getItem('fitsculpt_profile_v2');
+        return saved ? JSON.parse(saved) : DEFAULT_USER_PROFILE;
+      });
+
+      const [dailyLogs, setDailyLogs] = useState(() => {
+        const saved = localStorage.getItem('fitsculpt_logs_v2');
+        return saved ? JSON.parse(saved) : {};
+      });
+
+      const [selectedDate, setSelectedDate] = useState(() => {
+        return new Date().toISOString().split('T')[0];
+      });
+
+      const [activeTab, setActiveTab] = useState('dashboard'); // dashboard, analyzer, calculator, history
+      
+      const [cameraActive, setCameraActive] = useState(false);
+      const [capturedImage, setCapturedImage] = useState(null);
+      const [mealType, setMealType] = useState('breakfast');
+      const [isAnalyzing, setIsAnalyzing] = useState(false);
+      const [analysisResult, setAnalysisResult] = useState(null);
+      const [tempApiKey, setTempApiKey] = useState(() => localStorage.getItem('fitsculpt_api_key') || "");
+      
+      const [manualMeal, setManualMeal] = useState({ name: '', calories: '', protein: '', carbs: '', fat: '' });
+      const [exerciseForm, setExerciseForm] = useState({ type: 'strength', duration: 45, intensity: 'medium', notes: '' });
+      const [currentWeightInput, setCurrentWeightInput] = useState(userProfile.weight);
+      const [toast, setToast] = useState(null);
+
+      const videoRef = useRef(null);
+      const canvasRef = useRef(null);
+
+      // --- PERSISTENT UTILITIES ---
+      useEffect(() => {
+        localStorage.setItem('fitsculpt_profile_v2', JSON.stringify(userProfile));
+      }, [userProfile]);
+
+      useEffect(() => {
+        localStorage.setItem('fitsculpt_logs_v2', JSON.stringify(dailyLogs));
+      }, [dailyLogs]);
+
+      useEffect(() => {
+        localStorage.setItem('fitsculpt_api_key', tempApiKey);
+      }, [tempApiKey]);
+
+      const showToast = (message, type = 'success') => {
+        setToast({ message, type });
+        setTimeout(() => setToast(null), 3500);
+      };
+
+      const todayLog = dailyLogs[selectedDate] || {
+        meals: [],
+        water: 0,
+        exercise: null,
+        weight: userProfile.weight
+      };
+
+      const recalculateTargets = (profile) => {
+        const { age, gender, height, weight, activityLevel, goal } = profile;
+        
+        // Mifflin-St Jeor Formula
+        let bmrVal = 0;
+        if (gender === 'male') {
+          bmrVal = 10 * weight + 6.25 * height - 5 * age + 5;
+        } else {
+          bmrVal = 10 * weight + 6.25 * height - 5 * age - 161;
+        }
+        
+        const tdeeVal = Math.round(bmrVal * parseFloat(activityLevel));
+        let targetCal = tdeeVal;
+        let pRatio = 0.3; // protein ratio
+        let cRatio = 0.4; // carb ratio
+        let fRatio = 0.3; // fat ratio
+
+        if (goal === 'lose_fat') {
+          targetCal = Math.round(tdeeVal - 450); 
+          pRatio = 0.35; // preserve lean mass
+          cRatio = 0.35;
+          fRatio = 0.30;
+        } else if (goal === 'build_muscle') {
+          targetCal = Math.round(tdeeVal + 300);
+          pRatio = 0.30;
+          cRatio = 0.45;
+          fRatio = 0.25;
+        }
+
+        if (targetCal < bmrVal) targetCal = Math.round(bmrVal);
+
+        const targetProtein = Math.round((targetCal * pRatio) / 4);
+        const targetCarbs = Math.round((targetCal * cRatio) / 4);
+        const targetFat = Math.round((targetCal * fRatio) / 9);
+
+        return {
+          ...profile,
+          bmr: Math.round(bmrVal),
+          tdee: tdeeVal,
+          targetCalories: targetCal,
+          targetProtein,
+          targetCarbs,
+          targetFat
+        };
+      };
+
+      const handleProfileChange = (e) => {
+        const { name, value } = e.target;
+        setUserProfile(prev => {
+          const updated = { ...prev, [name]: isNaN(value) ? value : parseFloat(value) };
+          return recalculateTargets(updated);
+        });
+      };
+
+      const startCamera = async () => {
+        setCapturedImage(null);
+        setCameraActive(true);
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { facingMode: 'environment' } 
+          });
+          if (videoRef.current) {
+            videoRef.current.srcObject = stream;
+          }
+        } catch (err) {
+          console.error(err);
+          showToast("無法啟用相機，請允許權限、改採手動上傳或體驗預設模擬餐點！", "error");
+          setCameraActive(false);
+        }
+      };
+
+      const stopCamera = () => {
+        if (videoRef.current && videoRef.current.srcObject) {
+          const tracks = videoRef.current.srcObject.getTracks();
+          tracks.forEach(track => track.stop());
+        }
+        setCameraActive(false);
+      };
+
+      const capturePhoto = () => {
+        if (videoRef.current && canvasRef.current) {
+          const video = videoRef.current;
+          const canvas = canvasRef.current;
+          canvas.width = video.videoWidth;
+          canvas.height = video.videoHeight;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const base64 = canvas.toDataURL('image/png');
+          setCapturedImage(base64);
+          stopCamera();
+        }
+      };
+
+      const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setCapturedImage(reader.result);
+          };
+          reader.readAsDataURL(file);
+        }
+      };
+
+      const analyzeImageWithGemini = async (base64Data) => {
+        setIsAnalyzing(true);
+        setAnalysisResult(null);
+
+        const base64Clean = base64Data.split(',')[1];
+        const activeKey = tempApiKey || apiKey;
+        
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${activeKey}`;
+        
+        const systemPrompt = `You are an elite fitness nutritionist specialized in body sculpting, weight loss, and daily resistance/cardio tracking. 
+Analyze the user's food photo and estimate the food items, portions, calories, and macros.
+You must return your response strictly as a JSON object, with absolutely no surrounding markdown wrappers (do NOT use \`\`\`json or \`\`\`).
+The output must conform exactly to this schema:
+{
+  "foodName": "主要食物名稱",
+  "calories": 120,
+  "protein": 15,
+  "carbs": 20,
+  "fat": 5,
+  "analysis": "詳細的食物內容與份量估算分析...",
+  "advice": "針對重訓與有氧健身者的營養與雕塑建議..."
+}
+Respond fully in Traditional Chinese (繁體中文).`;
+
+        const payload = {
+          contents: [{
+            role: "user",
+            parts: [
+              { text: "這是我今天的一餐。請幫我分析其食物內容、估算熱量（大卡）與三大營養素（蛋白質、碳水、脂肪），並給予適合我每日重訓與有氧運動的飲食回饋與體態雕塑建議。" },
+              { inlineData: { mimeType: "image/png", data: base64Clean } }
+            ]
+          }],
+          systemInstruction: {
+            parts: [{ text: systemPrompt }]
+          },
+          generationConfig: {
+            responseMimeType: "application/json"
+          }
+        };
+
+        try {
+          if (!activeKey) {
+            // Trigger beautiful fallback / simulation instantly
+            setTimeout(() => {
+              const randomPreset = PRESET_FOODS[Math.floor(Math.random() * PRESET_FOODS.length)];
+              setAnalysisResult(randomPreset);
+              setIsAnalyzing(false);
+              showToast("展示模式：已為您載入預設高精準度模擬結果！(輸入 API 金鑰可使用真實圖片辨識)", "info");
+            }, 1200);
+            return;
+          }
+
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+
+          if (!response.ok) throw new Error(`HTTP: ${response.status}`);
+          const result = await response.json();
+          const textResponse = result.candidates?.[0]?.content?.parts?.[0]?.text;
+          
+          if (textResponse) {
+            const parsed = JSON.parse(textResponse);
+            setAnalysisResult({
+              name: parsed.foodName,
+              calories: parsed.calories,
+              protein: parsed.protein,
+              carbs: parsed.carbs,
+              fat: parsed.fat,
+              analysis: parsed.analysis,
+              advice: parsed.advice,
+              image: base64Data
+            });
+            showToast("Gemini 影像辨識成功！", "success");
+          } else {
+            throw new Error("無效的 API 回應");
+          }
+        } catch (err) {
+          console.error(err);
+          showToast("AI 辨識異常，已自動載入預設健康美食供您無障礙體驗！", "error");
+          const fallbackPreset = PRESET_FOODS[0];
+          setAnalysisResult({ ...fallbackPreset, image: base64Data });
+        } finally {
+          setIsAnalyzing(false);
+        }
+      };
+
+      const usePresetFood = (preset) => {
+        setCapturedImage(preset.image);
+        setAnalysisResult(preset);
+        showToast(`已成功套用預設食物：${preset.name}`, "success");
+      };
+
+      const saveAnalyzedMealToLog = () => {
+        if (!analysisResult) return;
+
+        const newMeal = {
+          id: Date.now().toString(),
+          type: mealType,
+          name: analysisResult.name || analysisResult.foodName,
+          calories: parseInt(analysisResult.calories) || 0,
+          protein: parseInt(analysisResult.protein) || 0,
+          carbs: parseInt(analysisResult.carbs) || 0,
+          fat: parseInt(analysisResult.fat) || 0,
+          image: analysisResult.image || "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&auto=format&fit=crop&q=60",
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          analysis: analysisResult.analysis,
+          advice: analysisResult.advice
+        };
+
+        updateLogForDate(selectedDate, (prevLog) => ({
+          ...prevLog,
+          meals: [...prevLog.meals, newMeal]
+        }));
+
+        showToast(`成功記錄至今天的「${getMealTypeLabel(mealType)}」！`);
+        setCapturedImage(null);
+        setAnalysisResult(null);
+        setActiveTab('dashboard');
+      };
+
+      const deleteMeal = (mealId) => {
+        updateLogForDate(selectedDate, (prevLog) => ({
+          ...prevLog,
+          meals: prevLog.meals.filter(m => m.id !== mealId)
+        }));
+        showToast("已刪除該筆飲食紀錄", "info");
+      };
+
+      const handleManualAdd = (e) => {
+        e.preventDefault();
+        if (!manualMeal.name || !manualMeal.calories) {
+          showToast("請至少輸入食物名稱與卡路里！", "error");
+          return;
+        }
+
+        const newMeal = {
+          id: Date.now().toString(),
+          type: mealType,
+          name: manualMeal.name,
+          calories: parseInt(manualMeal.calories) || 0,
+          protein: parseInt(manualMeal.protein) || 0,
+          carbs: parseInt(manualMeal.carbs) || 0,
+          fat: parseInt(manualMeal.fat) || 0,
+          image: "https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&auto=format&fit=crop&q=60",
+          time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          analysis: "手動輸入紀錄",
+          advice: "無 AI 影像辨識分析，請配合您的 TDEE 目標持續增肌減脂！"
+        };
+
+        updateLogForDate(selectedDate, (prevLog) => ({
+          ...prevLog,
+          meals: [...prevLog.meals, newMeal]
+        }));
+
+        showToast(`成功手動登錄：${manualMeal.name}`);
+        setManualMeal({ name: '', calories: '', protein: '', carbs: '', fat: '' });
+      };
+
+      const updateLogForDate = (date, updateFn) => {
+        setDailyLogs(prev => {
+          const currentLog = prev[date] || {
+            meals: [],
+            water: 0,
+            exercise: null,
+            weight: userProfile.weight
+          };
+          const updatedLog = updateFn(currentLog);
+          return { ...prev, [date]: updatedLog };
+        });
+      };
+
+      const adjustWater = (amount) => {
+        updateLogForDate(selectedDate, (prevLog) => ({
+          ...prevLog,
+          water: Math.max(0, prevLog.water + amount)
+        }));
+        showToast(`水分紀錄：${amount > 0 ? '+' : ''}${amount} ml`);
+      };
+
+      const handleWeightChange = (e) => {
+        const val = parseFloat(e.target.value) || 0;
+        setCurrentWeightInput(val);
+        updateLogForDate(selectedDate, (prevLog) => ({ ...prevLog, weight: val }));
+        setUserProfile(prev => recalculateTargets({ ...prev, weight: val }));
+      };
+
+      const handleExerciseSubmit = (e) => {
+        e.preventDefault();
+        let caloriesBurned = 0;
+        const intensityMultiplier = exerciseForm.intensity === 'high' ? 10 : exerciseForm.intensity === 'medium' ? 7 : 4;
+        const typeMultiplier = exerciseForm.type === 'both' ? 1.3 : 1.0;
+        caloriesBurned = Math.round((intensityMultiplier * userProfile.weight * (exerciseForm.duration / 60)) * typeMultiplier);
+
+        updateLogForDate(selectedDate, (prevLog) => ({
+          ...prevLog,
+          exercise: { ...exerciseForm, caloriesBurned }
+        }));
+
+        showToast(`已儲存運動！今日獲得 ${caloriesBurned} 大卡運動補償！`);
+      };
+
+      const removeExercise = () => {
+        updateLogForDate(selectedDate, (prevLog) => ({ ...prevLog, exercise: null }));
+        showToast("已清除運動紀錄", "info");
+      };
+
+      const getMealTypeLabel = (type) => {
+        switch (type) {
+          case 'breakfast': return '早餐 🌅';
+          case 'lunch': return '午餐 ☀️';
+          case 'dinner': return '晚餐 🌙';
+          case 'snack': return '點心 🍎';
+          default: return '餐點';
+        }
+      };
+
+      const loggedMeals = todayLog.meals || [];
+      const totalConsumedCalories = loggedMeals.reduce((acc, m) => acc + m.calories, 0);
+      const totalConsumedProtein = loggedMeals.reduce((acc, m) => acc + m.protein, 0);
+      const totalConsumedCarbs = loggedMeals.reduce((acc, m) => acc + m.carbs, 0);
+      const totalConsumedFat = loggedMeals.reduce((acc, m) => acc + m.fat, 0);
+      const exerciseCaloriesBurned = todayLog.exercise ? todayLog.exercise.caloriesBurned : 0;
+      
+      const dynamicTargetCalories = userProfile.targetCalories + exerciseCaloriesBurned;
+      const remainingCalories = dynamicTargetCalories - totalConsumedCalories;
+
+      const handleResetAllData = () => {
+        if (confirm("確定要重設所有數據嗎？這將徹底刪除本瀏覽器中的所有飲食、水分與運動明細！")) {
+          localStorage.removeItem('fitsculpt_profile_v2');
+          localStorage.removeItem('fitsculpt_logs_v2');
+          localStorage.removeItem('fitsculpt_api_key');
+          setUserProfile(DEFAULT_USER_PROFILE);
+          setDailyLogs({});
+          setTempApiKey("");
+          showToast("所有資料已安全重設", "info");
+        }
+      };
+
+      return (
+        <div className="min-h-screen pb-24 sm:pb-8">
+          {/* Toast Alert */}
+          {toast && (
+            <div className={`fixed top-4 right-4 z-50 flex items-center p-4 rounded-xl shadow-2xl border transition-all duration-300 ${
+              toast.type === 'error' ? 'bg-rose-950 border-rose-500 text-rose-200' :
+              toast.type === 'info' ? 'bg-sky-950 border-sky-500 text-sky-200' :
+              'bg-emerald-950 border-emerald-500 text-emerald-200'
+            }`}>
+              <span className="mr-2 font-bold">{toast.type === 'error' ? '⚠️' : '✨'}</span>
+              <span className="text-sm font-semibold">{toast.message}</span>
+            </div>
+          )}
+
+          {/* Top Navbar */}
+          <header className="border-b border-slate-800 bg-slate-900/90 backdrop-blur sticky top-0 z-40">
+            <div className="max-w-6xl mx-auto px-4 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-tr from-emerald-500 to-teal-400 rounded-2xl shadow-lg shadow-emerald-500/20">
+                  <svg className="w-8 h-8 text-slate-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div>
+                  <h1 className="text-xl sm:text-2xl font-black bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
+                    FitSculpt AI
+                  </h1>
+                  <p className="text-xs text-slate-400 font-medium tracking-wide">隨身智慧體能訓練與三餐卡路里分析系統</p>
+                </div>
+              </div>
+
+              {/* Date controller */}
+              <div className="flex items-center gap-3 bg-slate-900/90 p-1.5 rounded-2xl border border-slate-800">
+                <button
+                  onClick={() => {
+                    const prev = new Date(selectedDate);
+                    prev.setDate(prev.getDate() - 1);
+                    setSelectedDate(prev.toISOString().split('T')[0]);
+                  }}
+                  className="p-2 hover:bg-slate-800 rounded-xl transition text-slate-300 hover:text-white"
+                >
+                  ◀
+                </button>
+                <input
+                  type="date"
+                  value={selectedDate}
+                  onChange={(e) => setSelectedDate(e.target.value)}
+                  className="bg-transparent text-sm font-bold text-emerald-400 text-center focus:outline-none cursor-pointer"
+                />
+                <button
+                  onClick={() => {
+                    const next = new Date(selectedDate);
+                    next.setDate(next.getDate() + 1);
+                    setSelectedDate(next.toISOString().split('T')[0]);
+                  }}
+                  className="p-2 hover:bg-slate-800 rounded-xl transition text-slate-300 hover:text-white"
+                >
+                  ▶
+                </button>
+              </div>
+            </div>
+          </header>
+
+          {/* Main Layout Area */}
+          <main className="max-w-6xl mx-auto px-4 py-8">
+            
+            {/* Nav Tabs */}
+            <div className="flex bg-slate-900/60 p-1 rounded-2xl border border-slate-800/80 mb-8 overflow-x-auto no-scrollbar gap-1">
+              <button
+                onClick={() => setActiveTab('dashboard')}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-2 ${
+                  activeTab === 'dashboard' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                }`}
+              >
+                📊 每日儀表板
+              </button>
+              <button
+                onClick={() => setActiveTab('analyzer')}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-2 ${
+                  activeTab === 'analyzer' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                }`}
+              >
+                📸 AI 拍照算熱量
+              </button>
+              <button
+                onClick={() => setActiveTab('calculator')}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-2 ${
+                  activeTab === 'calculator' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                }`}
+              >
+                ⚖️ TDEE 雕塑計畫
+              </button>
+              <button
+                onClick={() => setActiveTab('history')}
+                className={`flex-1 py-3 px-4 rounded-xl text-sm font-bold transition-all duration-200 whitespace-nowrap flex items-center justify-center gap-2 ${
+                  activeTab === 'history' ? 'bg-gradient-to-r from-emerald-500 to-teal-500 text-slate-950 shadow-md shadow-emerald-500/10' : 'text-slate-400 hover:text-slate-200 hover:bg-slate-900'
+                }`}
+              >
+                📈 歷史趨勢
+              </button>
+            </div>
+
+            {/* ==========================================
+                TAB: DASHBOARD
+               ========================================== */}
+            {}
+            {activeTab === 'dashboard' && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                {/* Left Columns (Stats, Progress, and Meals List) */}
+                <div className="lg:col-span-2 space-y-8">
+                  
+                  {/* KPI Progress Card */}
+                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl relative overflow-hidden">
+                    <h3 className="text-lg font-bold text-slate-200 mb-6 flex items-center justify-between">
+                      <span>📅 今日營養預算</span>
+                      <span className="text-xs font-normal text-emerald-400 px-3 py-1 bg-slate-950 rounded-full border border-emerald-500/10">
+                        {userProfile.goal === 'lose_fat' ? '減脂瘦身 ✂️' : '增肌變壯 💪'}
+                      </span>
+                    </h3>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-4 gap-6 items-center">
+                      {/* Circle Cal Progress */}
+                      <div className="flex flex-col items-center justify-center relative col-span-1">
+                        <svg className="w-32 h-32 transform -rotate-90">
+                          <circle cx="64" cy="64" r="54" strokeWidth="8" stroke="#1e293b" fill="transparent" />
+                          <circle 
+                            cx="64" 
+                            cy="64" 
+                            r="54" 
+                            strokeWidth="8" 
+                            stroke="url(#emerald-grad)"
+                            fill="transparent" 
+                            strokeDasharray={2 * Math.PI * 54}
+                            strokeDashoffset={Math.max(0, 2 * Math.PI * 54 * (1 - totalConsumedCalories / dynamicTargetCalories))}
+                            strokeLinecap="round"
+                          />
+                          <defs>
+                            <linearGradient id="emerald-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                              <stop offset="0%" stopColor="#34d399" />
+                              <stop offset="100%" stopColor="#059669" />
+                            </linearGradient>
+                          </defs>
+                        </svg>
+                        <div className="absolute inset-0 flex flex-col items-center justify-center">
+                          <span className="text-[10px] text-slate-400">剩餘額度</span>
+                          <span className={`text-xl font-black ${remainingCalories >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                            {remainingCalories}
+                          </span>
+                          <span className="text-[10px] text-slate-500">kcal</span>
+                        </div>
+                      </div>
+
+                      {/* Math breakdown */}
+                      <div className="sm:col-span-3 grid grid-cols-3 gap-4 text-center sm:text-left bg-slate-950 p-4 rounded-2xl border border-slate-800">
+                        <div>
+                          <span className="block text-xs text-slate-400 mb-1">基礎計畫</span>
+                          <span className="text-base font-bold text-slate-200">{userProfile.targetCalories} <span className="text-[10px] font-normal text-slate-500">kcal</span></span>
+                        </div>
+                        <div className="border-x border-slate-850 px-4">
+                          <span className="block text-xs text-slate-400 mb-1">運動補償</span>
+                          <span className="text-base font-bold text-emerald-400">+{exerciseCaloriesBurned} <span className="text-[10px] font-normal text-slate-500">kcal</span></span>
+                        </div>
+                        <div>
+                          <span className="block text-xs text-slate-400 mb-1">今日已吃</span>
+                          <span className="text-base font-bold text-teal-400">{totalConsumedCalories} <span className="text-[10px] font-normal text-slate-500">kcal</span></span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Macros progress */}
+                    <div className="mt-8 space-y-4">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">三大宏量營養素目標達成度</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                        {/* Protein */}
+                        <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                          <div className="flex justify-between items-center mb-1.5 text-xs">
+                            <span className="font-semibold text-slate-300">🍗 蛋白質</span>
+                            <span className="text-emerald-400 font-bold">{totalConsumedProtein}g / {userProfile.targetProtein}g</span>
+                          </div>
+                          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div className="bg-emerald-500 h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(100, (totalConsumedProtein / userProfile.targetProtein) * 100)}%` }}></div>
+                          </div>
+                        </div>
+                        {/* Carbs */}
+                        <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                          <div className="flex justify-between items-center mb-1.5 text-xs">
+                            <span className="font-semibold text-slate-300">🌾 碳水</span>
+                            <span className="text-cyan-400 font-bold">{totalConsumedCarbs}g / {userProfile.targetCarbs}g</span>
+                          </div>
+                          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div className="bg-cyan-500 h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(100, (totalConsumedCarbs / userProfile.targetCarbs) * 100)}%` }}></div>
+                          </div>
+                        </div>
+                        {/* Fat */}
+                        <div className="bg-slate-950 p-3.5 rounded-xl border border-slate-800">
+                          <div className="flex justify-between items-center mb-1.5 text-xs">
+                            <span className="font-semibold text-slate-300">🥑 脂肪</span>
+                            <span className="text-amber-400 font-bold">{totalConsumedFat}g / {userProfile.targetFat}g</span>
+                          </div>
+                          <div className="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div className="bg-amber-500 h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(100, (totalConsumedFat / userProfile.targetFat) * 100)}%` }}></div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                  </div>
+
+                  {/* Meals log list */}
+                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-bold text-slate-200">🍽️ 今日餐點日誌 ({loggedMeals.length})</h3>
+                      <button
+                        onClick={() => setActiveTab('analyzer')}
+                        className="text-xs bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl font-bold transition"
+                      >
+                        新增一餐 ＋
+                      </button>
+                    </div>
+
+                    {loggedMeals.length === 0 ? (
+                      <div className="text-center py-12 bg-slate-950/40 border border-dashed border-slate-800 rounded-2xl">
+                        <span className="text-4xl block mb-3">🥗</span>
+                        <p className="text-slate-400 font-semibold">今日還沒有登錄飲食紀錄唷！</p>
+                        <p className="text-xs text-slate-500 mt-1">您可以利用「AI拍照算熱量」或套用快速預設美食來建立日誌！</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {loggedMeals.map((meal) => (
+                          <div key={meal.id} className="bg-slate-950 border border-slate-800 rounded-2xl p-4 flex flex-col sm:flex-row gap-4 relative overflow-hidden">
+                            <div className="w-full sm:w-20 h-20 rounded-xl overflow-hidden bg-slate-900 border border-slate-800 flex-shrink-0">
+                              <img src={meal.image} alt={meal.name} className="w-full h-full object-cover" onError={(e) => {e.target.src="https://images.unsplash.com/photo-1498837167922-ddd27525d352?w=600&auto=format&fit=crop&q=60"}} />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-start justify-between">
+                                <div>
+                                  <span className="text-[10px] font-bold bg-slate-800 text-slate-300 px-2 py-0.5 rounded-md">{getMealTypeLabel(meal.type)}</span>
+                                  <h4 className="text-base font-bold text-slate-200 mt-1">{meal.name}</h4>
+                                </div>
+                                <button onClick={() => deleteMeal(meal.id)} className="text-slate-500 hover:text-rose-400 text-sm p-1.5 rounded-lg transition">🗑️</button>
+                              </div>
+                              <div className="flex flex-wrap gap-2 mt-2">
+                                <span className="text-xs bg-slate-900 border border-slate-800 px-2 py-1 rounded-md text-emerald-400 font-bold">🔥 {meal.calories} kcal</span>
+                                <span className="text-xs bg-slate-900 px-2 py-1 rounded-md text-slate-400">🍗 {meal.protein}g 蛋</span>
+                                <span className="text-xs bg-slate-900 px-2 py-1 rounded-md text-slate-400">🌾 {meal.carbs}g 碳</span>
+                                <span className="text-xs bg-slate-900 px-2 py-1 rounded-md text-slate-400">🥑 {meal.fat}g 脂</span>
+                              </div>
+                              {meal.advice && (
+                                <div className="mt-3 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800 text-xs text-slate-400 leading-relaxed">
+                                  <strong className="text-emerald-400">💡 AI 營養回饋：</strong> {meal.advice}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                </div>
+
+                {/* Right Column: Hydration, Weight, & Training */}
+                {}
+                <div className="space-y-8">
+                  
+                  {/* Daily Weight Logger */}
+                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">
+                    <h3 className="text-md font-bold text-slate-200 mb-4">⚖️ 今日體重紀錄</h3>
+                    <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                      <div>
+                        <span className="text-xs text-slate-400 block">目前記錄體重</span>
+                        <div className="flex items-baseline gap-1 mt-1">
+                          <input
+                            type="number"
+                            step="0.1"
+                            value={currentWeightInput}
+                            onChange={handleWeightChange}
+                            className="bg-transparent text-2xl font-black text-emerald-400 focus:outline-none w-20 border-b border-dashed border-slate-700"
+                          />
+                          <span className="text-xs text-slate-400">kg</span>
+                        </div>
+                      </div>
+                      <span className="text-[10px] text-slate-500 text-right">更改體重會自動重計<br/>基礎 BMR 代謝</span>
+                    </div>
+                  </div>
+
+                  {/* Water Hydration */}
+                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">
+                    <h3 className="text-md font-bold text-slate-200 mb-3">💧 每日水分攝取量</h3>
+                    <div className="text-center py-2">
+                      <div className="text-2xl font-black text-sky-400">{todayLog.water} / 2500 <span className="text-xs font-normal text-slate-400">ml</span></div>
+                      <div className="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden mt-2 mb-4">
+                        <div className="bg-gradient-to-r from-sky-500 to-cyan-400 h-full rounded-full transition-all duration-300" style={{ width: `${Math.min(100, (todayLog.water / 2500) * 100)}%` }}></div>
+                      </div>
+                      <div className="flex gap-2 justify-center">
+                        <button onClick={() => adjustWater(250)} className="px-3 py-1.5 bg-sky-950/50 border border-sky-500/20 hover:bg-sky-900 text-sky-300 font-bold text-xs rounded-xl transition">＋ 250ml</button>
+                        <button onClick={() => adjustWater(600)} className="px-3 py-1.5 bg-cyan-950/50 border border-cyan-500/20 hover:bg-cyan-900 text-cyan-300 font-bold text-xs rounded-xl transition">＋ 600ml</button>
+                        <button onClick={() => adjustWater(-250)} className="px-2 py-1.5 bg-slate-950 hover:bg-slate-900 text-slate-400 text-xs rounded-xl transition">－</button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Training Workout tracker */}
+                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">
+                    <h3 className="text-md font-bold text-slate-200 mb-4">🏋️ 訓練運動記錄</h3>
+                    
+                    {todayLog.exercise ? (
+                      <div className="bg-slate-950 p-4 border border-slate-850 rounded-2xl relative">
+                        <div className="flex items-center gap-3">
+                          <span className="text-2xl">💪</span>
+                          <div>
+                            <h4 className="font-bold text-slate-200">
+                              {todayLog.exercise.type === 'strength' ? '重訓肌力阻力' : todayLog.exercise.type === 'cardio' ? '有氧耐力運動' : '重訓+有氧雙訓練'}
+                            </h4>
+                            <p className="text-xs text-slate-400">時間: {todayLog.exercise.duration} 分鐘 | 強度: {todayLog.exercise.intensity}</p>
+                          </div>
+                        </div>
+                        {todayLog.exercise.notes && <p className="text-xs italic text-slate-500 border-t border-slate-900 mt-2 pt-2">"{todayLog.exercise.notes}"</p>}
+                        <div className="mt-3 bg-emerald-500/10 text-emerald-400 font-black text-xs py-2 px-3 rounded-lg flex justify-between">
+                          <span>🔥 獲得卡路里補償：</span>
+                          <span>+{todayLog.exercise.caloriesBurned} kcal</span>
+                        </div>
+                        <button onClick={removeExercise} className="absolute top-2 right-2 text-xs text-slate-500 hover:text-rose-400 p-1">✕</button>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleExerciseSubmit} className="space-y-4">
+                        <div>
+                          <label className="block text-xs text-slate-400 font-bold mb-1">訓練模式</label>
+                          <select value={exerciseForm.type} onChange={(e) => setExerciseForm(prev => ({...prev, type: e.target.value}))} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300">
+                            <option value="strength">🏋️ 重訓 (阻力訓練)</option>
+                            <option value="cardio">🏃 有氧運動 (跑步/單車)</option>
+                            <option value="both">⚡ 都有 (重訓 + 有氧雙管齊下)</option>
+                          </select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-xs text-slate-400 font-bold mb-1">時間 (分鐘)</label>
+                            <input type="number" value={exerciseForm.duration} onChange={(e) => setExerciseForm(prev => ({...prev, duration: parseInt(e.target.value) || 0}))} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" min="1" />
+                          </div>
+                          <div>
+                            <label className="block text-xs text-slate-400 font-bold mb-1">強度等級</label>
+                            <select value={exerciseForm.intensity} onChange={(e) => setExerciseForm(prev => ({...prev, intensity: e.target.value}))} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300">
+                              <option value="low">低 (微汗)</option>
+                              <option value="medium">中 (呼吸微喘)</option>
+                              <option value="high">高 (爆汗疲力)</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-400 font-bold mb-1">簡短備註 (選填)</label>
+                          <input type="text" placeholder="例：深蹲、硬舉與有氧 20分" value={exerciseForm.notes} onChange={(e) => setExerciseForm(prev => ({...prev, notes: e.target.value}))} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" />
+                        </div>
+                        <button type="submit" className="w-full py-2 bg-slate-800 border border-slate-700/60 hover:bg-slate-700 text-slate-200 text-xs font-bold rounded-xl transition">儲存運動，補償熱量額度 💪</button>
+                      </form>
+                    )}
+                  </div>
+
+                </div>
+              </div>
+            )}
+
+            {/* ==========================================
+                TAB: AI MEAL ANALYZER
+               ========================================== */}
+            {}
+            {activeTab === 'analyzer' && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                {/* Left panel (Camera, upload, mock preset select) */}
+                <div className="lg:col-span-7 space-y-6">
+                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">
+                    <div className="flex justify-between items-center mb-2">
+                      <h3 className="text-lg font-bold text-slate-100">📸 拍攝或上傳食物照片</h3>
+                      <button onClick={() => {
+                        const k = prompt("請輸入您的 Google Gemini API Key:", tempApiKey);
+                        if (k !== null) {
+                          setTempApiKey(k);
+                          showToast("已暫存 API Key，即刻解鎖真實智慧拍照分析！");
+                        }
+                      }} className="text-[10px] bg-slate-800 hover:bg-slate-750 text-slate-400 px-2.5 py-1 rounded-lg transition">🔑 設定 API Key</button>
+                    </div>
+                    <p className="text-xs text-slate-400 mb-6">利用 Google AI 快速識別盤中飧，幫您估算熱量、三大營養素配比並提供最科學的飲食改善意見。</p>
+
+                    {/* Meal category selects */}
+                    <div className="mb-6">
+                      <span className="block text-xs text-slate-400 font-bold uppercase mb-2">餐次設定</span>
+                      <div className="grid grid-cols-4 gap-2">
+                        {['breakfast', 'lunch', 'dinner', 'snack'].map((type) => (
+                          <button key={type} onClick={() => setMealType(type)} className={`py-2 px-1 rounded-xl text-xs font-bold border transition ${mealType === type ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-slate-200'}`}>
+                            {type === 'breakfast' && '🌅 早餐'}
+                            {type === 'lunch' && '☀️ 午餐'}
+                            {type === 'dinner' && '🌙 晚餐'}
+                            {type === 'snack' && '🍎 點心'}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Capture Panel Area */}
+                    <div className="border-2 border-dashed border-slate-800 rounded-3xl bg-slate-950 overflow-hidden relative">
+                      {cameraActive ? (
+                        <div className="relative">
+                          <video ref={videoRef} autoPlay playsInline className="w-full aspect-video object-cover bg-black" />
+                          <div className="absolute bottom-4 inset-x-0 flex justify-center gap-3">
+                            <button onClick={capturePhoto} className="px-5 py-2.5 bg-emerald-500 text-slate-950 font-black text-xs rounded-full shadow-lg">📸 即刻拍攝</button>
+                            <button onClick={stopCamera} className="px-3 py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-300 font-semibold text-xs rounded-full">取消</button>
+                          </div>
+                        </div>
+                      ) : capturedImage ? (
+                        <div className="relative p-4">
+                          <img src={capturedImage} alt="Captured food preview" className="w-full max-h-72 object-contain rounded-2xl bg-black" />
+                          <button onClick={() => setCapturedImage(null)} className="absolute top-6 right-6 p-2 bg-slate-950/80 hover:bg-slate-900 rounded-full text-xs text-slate-300 transition">✕ 移除重選</button>
+                        </div>
+                      ) : (
+                        <div className="py-12 text-center flex flex-col items-center justify-center px-4">
+                          <span className="text-4xl block mb-3">🥗</span>
+                          <p className="text-slate-300 font-semibold mb-1">尚未選取餐點相片</p>
+                          <p className="text-[10px] text-slate-500 max-w-sm mb-6">您可以使用電腦/手機鏡頭現拍，上傳本機圖檔，或在下方點擊精選美食直接體驗 AI 的判斷結果！</p>
+                          <div className="flex flex-wrap gap-2 justify-center">
+                            <button onClick={startCamera} className="px-4 py-2 bg-slate-800 hover:bg-slate-750 border border-slate-750 text-slate-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5">📷 啟用相機</button>
+                            <label className="px-4 py-2 bg-slate-800 hover:bg-slate-750 border border-slate-750 text-slate-200 text-xs font-bold rounded-xl transition flex items-center gap-1.5 cursor-pointer">
+                              📂 上傳照片
+                              <input type="file" accept="image/*" onChange={handleFileUpload} className="hidden" />
+                            </label>
+                          </div>
+                        </div>
+                      )}
+                      <canvas ref={canvasRef} className="hidden" />
+                    </div>
+
+                    {/* Pre-made mocks for trial */}
+                    <div className="mt-6 border-t border-slate-800/80 pt-6">
+                      <div className="flex items-center justify-between mb-3">
+                        <span className="text-xs font-bold text-slate-400 tracking-wider uppercase">💡 免照快速模擬體驗區 (強烈推薦無金鑰測試)</span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        {PRESET_FOODS.map((food, idx) => (
+                          <button key={idx} onClick={() => usePresetFood(food)} className="bg-slate-950 border border-slate-800 hover:border-emerald-500/30 p-2 rounded-xl text-left transition flex items-center gap-2">
+                            <div className="w-10 h-10 rounded-lg overflow-hidden bg-slate-800 flex-shrink-0">
+                              <img src={food.image} alt={food.name} className="w-full h-full object-cover" />
+                            </div>
+                            <div className="min-w-0">
+                              <h4 className="text-xs font-bold text-slate-200 truncate">{food.name}</h4>
+                              <span className="text-[9px] text-emerald-400 font-semibold">{food.calories} kcal</span>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Process Action button */}
+                    {capturedImage && !analysisResult && (
+                      <div className="mt-6">
+                        <button
+                          onClick={() => analyzeImageWithGemini(capturedImage)}
+                          disabled={isAnalyzing}
+                          className="w-full py-3.5 bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-slate-950 font-black rounded-xl shadow-lg transition flex items-center justify-center gap-2"
+                        >
+                          {isAnalyzing ? (
+                            <>
+                              <svg className="animate-spin h-4 w-4 text-slate-950" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Gemini 智能卡路里精算中...
+                            </>
+                          ) : (
+                            <>🪄 點擊啟動 AI 卡路里判斷</>
+                          )}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Manual Backup form */}
+                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">
+                    <h4 className="text-xs font-bold text-slate-300 uppercase mb-3">✍️ 手動快速輸入熱量明細 (免拍照)</h4>
+                    <form onSubmit={handleManualAdd} className="space-y-4">
+                      <div>
+                        <label className="block text-xs text-slate-400 mb-1">菜色/食物名稱</label>
+                        <input type="text" placeholder="例：無糖黑咖啡與荷包蛋二顆" value={manualMeal.name} onChange={(e) => setManualMeal(p => ({...p, name: e.target.value}))} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" />
+                      </div>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div>
+                          <label className="block text-[10px] text-slate-400 mb-1">熱量(kcal)</label>
+                          <input type="number" placeholder="kcal" value={manualMeal.calories} onChange={(e) => setManualMeal(p => ({...p, calories: e.target.value}))} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-slate-300" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-slate-400 mb-1">蛋白(g)</label>
+                          <input type="number" placeholder="g" value={manualMeal.protein} onChange={(e) => setManualMeal(p => ({...p, protein: e.target.value}))} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-slate-300" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-slate-400 mb-1">碳水(g)</label>
+                          <input type="number" placeholder="g" value={manualMeal.carbs} onChange={(e) => setManualMeal(p => ({...p, carbs: e.target.value}))} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-slate-300" />
+                        </div>
+                        <div>
+                          <label className="block text-[10px] text-slate-400 mb-1">脂肪(g)</label>
+                          <input type="number" placeholder="g" value={manualMeal.fat} onChange={(e) => setManualMeal(p => ({...p, fat: e.target.value}))} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-2 py-1.5 text-xs text-slate-300" />
+                        </div>
+                      </div>
+                      <button type="submit" className="w-full py-2 bg-slate-800 hover:bg-slate-750 text-slate-300 text-xs font-bold rounded-xl border border-slate-700/60">手動儲存到今日日誌</button>
+                    </form>
+                  </div>
+                </div>
+
+                {/* Right panel (Result output with nutrition feedback) */}
+                {}
+                <div className="lg:col-span-5">
+                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl sticky top-24 min-h-[350px]">
+                    <h3 className="text-md font-bold text-slate-300 border-b border-slate-800 pb-3 mb-4">🍽️ AI 估算與體雕建議</h3>
+                    
+                    {isAnalyzing ? (
+                      <div className="flex flex-col items-center justify-center text-center py-16">
+                        <div className="w-12 h-12 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+                        <h4 className="text-sm font-bold text-slate-200">正在分析餐點中...</h4>
+                        <p className="text-[10px] text-slate-500 mt-1 max-w-xs">正在分析圖片克數、食物組成及營養素分配</p>
+                      </div>
+                    ) : analysisResult ? (
+                      <div className="space-y-4">
+                        <div>
+                          <span className="text-[10px] text-slate-400">推估主要食物：</span>
+                          <h4 className="text-lg font-extrabold text-emerald-400 mt-0.5">{analysisResult.name || analysisResult.foodName}</h4>
+                        </div>
+
+                        <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 flex items-center justify-between">
+                          <div>
+                            <span className="text-[10px] text-slate-400">總熱量</span>
+                            <div className="text-2xl font-black text-slate-200">{analysisResult.calories} <span className="text-xs font-normal text-slate-500">kcal</span></div>
+                          </div>
+                          <div className="flex gap-2">
+                            <div className="bg-slate-900 px-2 py-1 rounded text-center">
+                              <span className="block text-[9px] text-slate-500">🍗 蛋白</span>
+                              <span className="text-xs font-bold text-slate-300">{analysisResult.protein}g</span>
+                            </div>
+                            <div className="bg-slate-900 px-2 py-1 rounded text-center">
+                              <span className="block text-[9px] text-slate-500">🌾 碳水</span>
+                              <span className="text-xs font-bold text-slate-300">{analysisResult.carbs}g</span>
+                            </div>
+                            <div className="bg-slate-900 px-2 py-1 rounded text-center">
+                              <span className="block text-[9px] text-slate-500">🥑 脂肪</span>
+                              <span className="text-xs font-bold text-slate-300">{analysisResult.fat}g</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="bg-slate-950/50 p-3.5 rounded-xl border border-slate-850 text-xs text-slate-400 leading-relaxed">
+                          <strong className="text-slate-300 block mb-1">🔍 份量內容分析：</strong>
+                          {analysisResult.analysis}
+                        </div>
+
+                        <div className="bg-emerald-950/20 p-3.5 rounded-xl border border-emerald-900/30 text-xs text-slate-400 leading-relaxed">
+                          <strong className="text-emerald-400 block mb-1">💡 體型雕塑增肌減脂回饋：</strong>
+                          {analysisResult.advice}
+                        </div>
+
+                        <div className="flex gap-3 pt-2">
+                          <button onClick={saveAnalyzedMealToLog} className="flex-1 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-black text-xs rounded-xl transition">✔ 登錄到今日日誌</button>
+                          <button onClick={() => { setCapturedImage(null); setAnalysisResult(null); }} className="px-3 py-2.5 bg-slate-800 hover:bg-slate-750 text-slate-400 text-xs rounded-xl">重選</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="py-16 text-center border border-dashed border-slate-850 rounded-3xl bg-slate-950/10">
+                        <span className="text-3xl block mb-2">📸</span>
+                        <p className="text-xs text-slate-400">目前尚無 AI 分析數據</p>
+                        <p className="text-[10px] text-slate-500 mt-1 max-w-xs mx-auto">請在左側點選「相機拍照」、「上傳照片」或一鍵套用模擬試用，並按下 AI 辨識卡路里！</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* ==========================================
+                TAB: TDEE CALCULATOR
+               ========================================== */}
+            {}
+            {activeTab === 'calculator' && (
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                
+                {/* Parameters panel */}
+                <div className="lg:col-span-7">
+                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">
+                    <h3 className="text-lg font-bold text-slate-100 mb-6">⚙️ 自訂您的體脂雕塑生理數值</h3>
+                    <form className="space-y-6">
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-400 font-bold uppercase mb-1">生理性別</label>
+                          <div className="grid grid-cols-2 gap-2">
+                            {['male', 'female'].map(g => (
+                              <button key={g} type="button" onClick={() => handleProfileChange({ target: { name: 'gender', value: g }})} className={`py-2 px-3 rounded-xl text-xs font-bold border transition ${userProfile.gender === g ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-slate-950 border-slate-800 text-slate-400'}`}>
+                                {g === 'male' ? '👨 男性' : '👩 女性'}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-400 font-bold uppercase mb-1">年齡 (歲)</label>
+                          <input type="number" name="age" value={userProfile.age} onChange={handleProfileChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" min="1" />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-xs text-slate-400 font-bold uppercase mb-1">身高 (cm)</label>
+                          <input type="number" name="height" value={userProfile.height} onChange={handleProfileChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" min="1" />
+                        </div>
+                        <div>
+                          <label className="block text-xs text-slate-400 font-bold uppercase mb-1">目前體重 (kg)</label>
+                          <input type="number" name="weight" value={userProfile.weight} onChange={handleProfileChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300" min="1" />
+                        </div>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs text-slate-400 font-bold uppercase mb-1">日常活動程度</label>
+                        <select name="activityLevel" value={userProfile.activityLevel} onChange={handleProfileChange} className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-300">
+                          <option value="1.2">久坐無規律運動 (1.2)</option>
+                          <option value="1.375">輕度活動：每週運動 1-3 天 (1.375)</option>
+                          <option value="1.55">中度活動：每週激烈運動 3-5 天 (1.55) 💡 推薦重訓有氧族</option>
+                          <option value="1.725">高度活動：每週激烈重訓有氧 6-7 天 (1.725)</option>
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-xs text-slate-400 font-bold uppercase mb-1">減重雕塑階段計畫</label>
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                          {[
+                            { id: 'lose_fat', title: '✂️ 減脂塑型', desc: '熱量赤字 (約 TDEE - 400)' },
+                            { id: 'maintain', title: '🧘 維持體態', desc: '熱量平衡 (每日日常熱量)' },
+                            { id: 'build_muscle', title: '💪 乾淨增肌', desc: '熱量盈餘 (約 TDEE + 300)' }
+                          ].map(goalOpt => (
+                            <button key={goalOpt.id} type="button" onClick={() => handleProfileChange({ target: { name: 'goal', value: goalOpt.id }})} className={`p-3 rounded-xl text-left border transition ${userProfile.goal === goalOpt.id ? 'bg-emerald-500/10 border-emerald-500 text-emerald-400' : 'bg-slate-950 border-slate-800 text-slate-400'}`}>
+                              <div className="font-bold text-xs">{goalOpt.title}</div>
+                              <div className="text-[9px] opacity-70 mt-0.5">{goalOpt.desc}</div>
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </form>
+                  </div>
+                </div>
+
+                {/* Output indicator specs card */}
+                {}
+                <div className="lg:col-span-5">
+                  <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl sticky top-24 space-y-6">
+                    <h3 className="text-md font-bold text-slate-300 pb-3 border-b border-slate-800">🎯 專屬運動雕塑飲食大綱</h3>
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-slate-950 p-4 rounded-xl border border-slate-850">
+                        <span className="text-[10px] text-slate-400 block">基礎代謝 (BMR)</span>
+                        <span className="text-lg font-black text-slate-200 mt-1">{userProfile.bmr} <span className="text-xs font-normal text-slate-500">kcal</span></span>
+                      </div>
+                      <div className="bg-slate-950 p-4 rounded-xl border border-slate-850">
+                        <span className="text-[10px] text-slate-400 block">每日總熱量 (TDEE)</span>
+                        <span className="text-lg font-black text-teal-400 mt-1">{userProfile.tdee} <span className="text-xs font-normal text-slate-500">kcal</span></span>
+                      </div>
+                    </div>
+
+                    <div className="bg-gradient-to-tr from-emerald-950/40 to-teal-950/40 p-4 rounded-xl border border-emerald-500/10">
+                      <span className="text-[10px] text-slate-300 block">💡 推薦體雕期每日卡路里攝取目標：</span>
+                      <div className="text-2xl font-black text-emerald-400 mt-1">{userProfile.targetCalories} <span className="text-xs font-normal text-slate-400">kcal</span></div>
+                      <p className="text-[10px] text-slate-400 mt-2 leading-relaxed">此熱量已預留適度的赤字區間，讓您每日維持高強度阻力訓練時，既能保留寶貴的肌肉，又能穩定燃燒多餘脂肪脂肪。</p>
+                    </div>
+
+                    <div className="space-y-2">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">黃金巨量分配 (35/35/30 體型雕塑餐標)</span>
+                      <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between">
+                        <span className="text-xs text-slate-400">🍗 蛋白質攝取 (肌肉修補)</span>
+                        <span className="text-xs font-bold text-emerald-400">{userProfile.targetProtein} g</span>
+                      </div>
+                      <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between">
+                        <span className="text-xs text-slate-400">🌾 碳水化合物 (爆發與有氧能)</span>
+                        <span className="text-xs font-bold text-cyan-400">{userProfile.targetCarbs} g</span>
+                      </div>
+                      <div className="bg-slate-950 p-3 rounded-xl border border-slate-800 flex justify-between">
+                        <span className="text-xs text-slate-400">🥑 健康好脂肪 (內分泌恆定)</span>
+                        <span className="text-xs font-bold text-amber-400">{userProfile.targetFat} g</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+            )}
+
+            {/* ==========================================
+                TAB: HISTORY & ANALYTICS
+               ========================================== */}
+            {}
+            {activeTab === 'history' && (
+              <div className="space-y-8">
+                
+                {/* Graphical SVG Linechart trend */}
+                <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">
+                  <h3 className="text-md font-bold text-slate-200 mb-6">📈 體重及熱量波動趨勢圖表</h3>
+                  {Object.keys(dailyLogs).length < 2 ? (
+                    <div className="text-center py-12 bg-slate-950/40 border border-dashed border-slate-800 rounded-2xl">
+                      <span className="text-3xl block mb-2">📊</span>
+                      <p className="text-xs text-slate-400">累積至少兩日以上的紀錄後，此處將自動產生動態趨勢曲線圖表喔！</p>
+                      <p className="text-[10px] text-slate-500 mt-1">您可以利用上方日期列，手動為昨天或前天填入數值來快速模擬生成。</p>
+                    </div>
+                  ) : (
+                    <div className="h-60 w-full bg-slate-950 p-4 rounded-2xl border border-slate-800 flex flex-col justify-between">
+                      <span className="text-xs text-slate-400">體重下降趨勢記錄線 (kg)</span>
+                      
+                      <div className="flex-1 relative flex items-end justify-between px-4 pb-2 pt-4 border-b border-l border-slate-800">
+                        {/* Custom interactive SVG points */}
+                        <svg className="absolute inset-0 w-full h-full p-4 overflow-visible" preserveAspectRatio="none">
+                          {(() => {
+                            const sortedDates = Object.keys(dailyLogs).sort();
+                            const weights = sortedDates.map(d => dailyLogs[d].weight || userProfile.weight);
+                            const minW = Math.min(...weights) - 1;
+                            const maxW = Math.max(...weights) + 1;
+                            const range = maxW - minW || 1;
+
+                            const points = sortedDates.map((date, idx) => {
+                              const x = (idx / (sortedDates.length - 1)) * 100;
+                              const y = 100 - (((weights[idx] - minW) / range) * 100);
+                              return `${x},${y}`;
+                            });
+
+                            return (
+                              <>
+                                <polyline fill="none" stroke="#10b981" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
+                                  points={points.map(p => {
+                                    const [x, y] = p.split(',');
+                                    return `${x}% ${y}%`;
+                                  }).join(' ')}
+                                />
+                                {sortedDates.map((date, idx) => {
+                                  const x = `${(idx / (sortedDates.length - 1)) * 100}%`;
+                                  const y = `${100 - (((weights[idx] - minW) / range) * 100)}%`;
+                                  return (
+                                    <circle key={date} cx={x} cy={y} r="5" fill="#10b981" stroke="#0f172a" strokeWidth="2" className="cursor-pointer hover:r-7 transition-all">
+                                      <title>{`${date}: ${weights[idx]} kg`}</title>
+                                    </circle>
+                                  );
+                                })}
+                              </>
+                            );
+                          })()}
+                        </svg>
+                      </div>
+                      <div className="flex justify-between text-[9px] text-slate-500 px-4 mt-2">
+                        {Object.keys(dailyLogs).sort().map(d => <span key={d}>{d.substring(5)}</span>)}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* History明細清單 */}
+                <div className="bg-slate-900/50 rounded-3xl border border-slate-800 p-6 shadow-xl">
+                  <h3 className="text-md font-bold text-slate-200 mb-4">📜 生理與飲食歷史紀錄明細</h3>
+                  <div className="space-y-4">
+                    {Object.keys(dailyLogs).length === 0 ? (
+                      <p className="text-xs text-slate-500 text-center py-6">暫無任何歷史數據</p>
+                    ) : (
+                      Object.keys(dailyLogs).sort((a,b) => b.localeCompare(a)).map(date => {
+                        const log = dailyLogs[date];
+                        const dayMeals = log.meals || [];
+                        const dayCalories = dayMeals.reduce((acc, m) => acc + m.calories, 0);
+                        return (
+                          <div key={date} className="bg-slate-950 p-4 rounded-xl border border-slate-850 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-slate-100">{date}</span>
+                                <span className="text-[10px] bg-slate-900 px-2 py-0.5 rounded-full text-slate-400">⚖️ {log.weight || '未紀錄'} kg</span>
+                              </div>
+                              <div className="flex gap-4 mt-1 text-[11px] text-slate-500">
+                                <span>🍽️ 攝取熱量：<strong className="text-emerald-400">{dayCalories} kcal</strong></span>
+                                <span>💧 水分：<strong>{log.water} ml</strong></span>
+                                {log.exercise && <span className="text-emerald-400">🏋️ 運動：<strong>{log.exercise.caloriesBurned} kcal 補償</strong></span>}
+                              </div>
+                            </div>
+                            <button onClick={() => { setSelectedDate(date); setActiveTab('dashboard'); }} className="text-xs bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold px-3 py-1.5 rounded-lg transition border border-slate-800">查看這天</button>
+                          </div>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* Danger zone / Clear options */}
+                <div className="bg-slate-900/50 rounded-3xl border border-rose-950 p-6 shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4">
+                  <div>
+                    <h4 className="text-xs font-bold text-rose-400">⚠️ 重置全網頁資料庫</h4>
+                    <p className="text-[10px] text-slate-500 mt-1">這將會一鍵清空保存在這部設備上的所有體脂日誌、水分與重訓明細，請謹慎使用。</p>
+                  </div>
+                  <button onClick={handleResetAllData} className="px-4 py-2 bg-rose-950 border border-rose-500/20 text-rose-300 font-bold text-xs rounded-xl hover:bg-rose-900 transition whitespace-nowrap">重設所有數據</button>
+                </div>
+
+              </div>
+            )}
+
+          </main>
+
+          {/* Floating nav (for Mobile ergonomics) */}
+          <div className="fixed bottom-0 inset-x-0 bg-slate-950/90 backdrop-blur border-t border-slate-900 px-4 py-2 flex justify-around sm:hidden z-30">
+            <button onClick={() => setActiveTab('dashboard')} className={`flex flex-col items-center gap-0.5 ${activeTab === 'dashboard' ? 'text-emerald-400' : 'text-slate-500'}`}>
+              <span className="text-lg">📊</span>
+              <span className="text-[9px] font-bold">儀表板</span>
+            </button>
+            <button onClick={() => setActiveTab('analyzer')} className={`flex flex-col items-center gap-0.5 ${activeTab === 'analyzer' ? 'text-emerald-400' : 'text-slate-500'}`}>
+              <span className="text-lg">📸</span>
+              <span className="text-[9px] font-bold">AI拍照</span>
+            </button>
+            <button onClick={() => setActiveTab('calculator')} className={`flex flex-col items-center gap-0.5 ${activeTab === 'calculator' ? 'text-emerald-400' : 'text-slate-500'}`}>
+              <span className="text-lg">⚖️</span>
+              <span className="text-[9px] font-bold">TDEE計畫</span>
+            </button>
+            <button onClick={() => setActiveTab('history')} className={`flex flex-col items-center gap-0.5 ${activeTab === 'history' ? 'text-emerald-400' : 'text-slate-500'}`}>
+              <span className="text-lg">📈</span>
+              <span className="text-[9px] font-bold">趨勢</span>
+            </button>
+          </div>
+
+        </div>
+      );
+    }
+
+    ReactDOM.render(<App />, document.getElementById('root'));
+  </script>
+</body>
+</html>
